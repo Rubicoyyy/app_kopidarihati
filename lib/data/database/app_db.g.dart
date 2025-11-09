@@ -72,6 +72,21 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -80,6 +95,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     image,
     rating,
     category,
+    isFavorite,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -136,6 +152,12 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     } else if (isInserting) {
       context.missing(_categoryMeta);
     }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
     return context;
   }
 
@@ -169,6 +191,10 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
     );
   }
 
@@ -185,6 +211,7 @@ class Product extends DataClass implements Insertable<Product> {
   final String image;
   final double rating;
   final String category;
+  final bool isFavorite;
   const Product({
     required this.id,
     required this.title,
@@ -192,6 +219,7 @@ class Product extends DataClass implements Insertable<Product> {
     required this.image,
     required this.rating,
     required this.category,
+    required this.isFavorite,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -202,6 +230,7 @@ class Product extends DataClass implements Insertable<Product> {
     map['image'] = Variable<String>(image);
     map['rating'] = Variable<double>(rating);
     map['category'] = Variable<String>(category);
+    map['is_favorite'] = Variable<bool>(isFavorite);
     return map;
   }
 
@@ -213,6 +242,7 @@ class Product extends DataClass implements Insertable<Product> {
       image: Value(image),
       rating: Value(rating),
       category: Value(category),
+      isFavorite: Value(isFavorite),
     );
   }
 
@@ -228,6 +258,7 @@ class Product extends DataClass implements Insertable<Product> {
       image: serializer.fromJson<String>(json['image']),
       rating: serializer.fromJson<double>(json['rating']),
       category: serializer.fromJson<String>(json['category']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
     );
   }
   @override
@@ -240,6 +271,7 @@ class Product extends DataClass implements Insertable<Product> {
       'image': serializer.toJson<String>(image),
       'rating': serializer.toJson<double>(rating),
       'category': serializer.toJson<String>(category),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
     };
   }
 
@@ -250,6 +282,7 @@ class Product extends DataClass implements Insertable<Product> {
     String? image,
     double? rating,
     String? category,
+    bool? isFavorite,
   }) => Product(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -257,6 +290,7 @@ class Product extends DataClass implements Insertable<Product> {
     image: image ?? this.image,
     rating: rating ?? this.rating,
     category: category ?? this.category,
+    isFavorite: isFavorite ?? this.isFavorite,
   );
   Product copyWithCompanion(ProductsCompanion data) {
     return Product(
@@ -266,6 +300,9 @@ class Product extends DataClass implements Insertable<Product> {
       image: data.image.present ? data.image.value : this.image,
       rating: data.rating.present ? data.rating.value : this.rating,
       category: data.category.present ? data.category.value : this.category,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
     );
   }
 
@@ -277,13 +314,15 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('price: $price, ')
           ..write('image: $image, ')
           ..write('rating: $rating, ')
-          ..write('category: $category')
+          ..write('category: $category, ')
+          ..write('isFavorite: $isFavorite')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, price, image, rating, category);
+  int get hashCode =>
+      Object.hash(id, title, price, image, rating, category, isFavorite);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -293,7 +332,8 @@ class Product extends DataClass implements Insertable<Product> {
           other.price == this.price &&
           other.image == this.image &&
           other.rating == this.rating &&
-          other.category == this.category);
+          other.category == this.category &&
+          other.isFavorite == this.isFavorite);
 }
 
 class ProductsCompanion extends UpdateCompanion<Product> {
@@ -303,6 +343,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String> image;
   final Value<double> rating;
   final Value<String> category;
+  final Value<bool> isFavorite;
   const ProductsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -310,6 +351,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.image = const Value.absent(),
     this.rating = const Value.absent(),
     this.category = const Value.absent(),
+    this.isFavorite = const Value.absent(),
   });
   ProductsCompanion.insert({
     this.id = const Value.absent(),
@@ -318,6 +360,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     required String image,
     required double rating,
     required String category,
+    this.isFavorite = const Value.absent(),
   }) : title = Value(title),
        price = Value(price),
        image = Value(image),
@@ -330,6 +373,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<String>? image,
     Expression<double>? rating,
     Expression<String>? category,
+    Expression<bool>? isFavorite,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -338,6 +382,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (image != null) 'image': image,
       if (rating != null) 'rating': rating,
       if (category != null) 'category': category,
+      if (isFavorite != null) 'is_favorite': isFavorite,
     });
   }
 
@@ -348,6 +393,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String>? image,
     Value<double>? rating,
     Value<String>? category,
+    Value<bool>? isFavorite,
   }) {
     return ProductsCompanion(
       id: id ?? this.id,
@@ -356,6 +402,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       image: image ?? this.image,
       rating: rating ?? this.rating,
       category: category ?? this.category,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 
@@ -380,6 +427,9 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (category.present) {
       map['category'] = Variable<String>(category.value);
     }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
     return map;
   }
 
@@ -391,7 +441,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('price: $price, ')
           ..write('image: $image, ')
           ..write('rating: $rating, ')
-          ..write('category: $category')
+          ..write('category: $category, ')
+          ..write('isFavorite: $isFavorite')
           ..write(')'))
         .toString();
   }
@@ -1149,6 +1200,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
       required String image,
       required double rating,
       required String category,
+      Value<bool> isFavorite,
     });
 typedef $$ProductsTableUpdateCompanionBuilder =
     ProductsCompanion Function({
@@ -1158,6 +1210,7 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<String> image,
       Value<double> rating,
       Value<String> category,
+      Value<bool> isFavorite,
     });
 
 final class $$ProductsTableReferences
@@ -1219,6 +1272,11 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<String> get category => $composableBuilder(
     column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1286,6 +1344,11 @@ class $$ProductsTableOrderingComposer
     column: $table.category,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProductsTableAnnotationComposer
@@ -1314,6 +1377,11 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
 
   Expression<T> orderItemsRefs<T extends Object>(
     Expression<T> Function($$OrderItemsTableAnnotationComposer a) f,
@@ -1375,6 +1443,7 @@ class $$ProductsTableTableManager
                 Value<String> image = const Value.absent(),
                 Value<double> rating = const Value.absent(),
                 Value<String> category = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
               }) => ProductsCompanion(
                 id: id,
                 title: title,
@@ -1382,6 +1451,7 @@ class $$ProductsTableTableManager
                 image: image,
                 rating: rating,
                 category: category,
+                isFavorite: isFavorite,
               ),
           createCompanionCallback:
               ({
@@ -1391,6 +1461,7 @@ class $$ProductsTableTableManager
                 required String image,
                 required double rating,
                 required String category,
+                Value<bool> isFavorite = const Value.absent(),
               }) => ProductsCompanion.insert(
                 id: id,
                 title: title,
@@ -1398,6 +1469,7 @@ class $$ProductsTableTableManager
                 image: image,
                 rating: rating,
                 category: category,
+                isFavorite: isFavorite,
               ),
           withReferenceMapper: (p0) => p0
               .map(

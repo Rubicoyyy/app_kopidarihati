@@ -16,6 +16,7 @@ class Products extends Table {
   TextColumn get image => text()();
   RealColumn get rating => real()();
   TextColumn get category => text()();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('Order')
@@ -39,33 +40,27 @@ class OrderItems extends Table {
 }
 
 @DriftDatabase(
-  // Beri tahu database semua tabel yang ada
   tables: [Products, Orders, OrderItems],
-  // Beri tahu database semua DAO yang ada
   daos: [ProductDao, OrderDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3; // NAIKKAN VERSI! (Misal ke 3)
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onUpgrade: (migrator, from, to) async {
-        // Hapus semua tabel lama
         for (final table in allTables) {
           await migrator.deleteTable(table.actualTableName);
         }
-        // Buat ulang semua tabel baru
+
         await migrator.createAll();
       },
     );
   }
-
-  // Hapus semua logika query dari sini,
-  // karena sudah dipindahkan ke DAO
 }
 
 LazyDatabase _openConnection() {

@@ -3,10 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'config/router.dart';
-import 'data/database/app_db.dart'; // Import AppDatabase
+import 'data/database/app_db.dart';
 import 'providers/cart_provider.dart';
 
-void main() {
+// ===== 1. IMPORT PAKET INTIL =====
+import 'package:intl/date_symbol_data_local.dart';
+
+void main() async {
+  // <-- 2. JADIKAN FUNGSI 'main' ASYNCHRONOUS
+  // ===== 3. TAMBAHKAN DUA BARIS INI =====
+  // Pastikan Flutter terinisialisasi
+  WidgetsFlutterBinding.ensureInitialized();
+  // Muat data locale Indonesia (penting untuk format tanggal)
+  await initializeDateFormatting('id_ID', null);
+  // ===================================
+
   runApp(const KopiDariHatiApp());
 }
 
@@ -15,10 +26,8 @@ class KopiDariHatiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gunakan MultiProvider untuk menyediakan lebih dari satu provider
     return MultiProvider(
       providers: [
-        // Sediakan AppDatabase secara global
         Provider<AppDatabase>(
           create: (context) => AppDatabase(),
           dispose: (context, db) => db.close(),
@@ -30,7 +39,11 @@ class KopiDariHatiApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Kopi Dari Hati',
         theme: ThemeData(
-          // ... (Tidak ada perubahan di sini)
+          scaffoldBackgroundColor: const Color(0xFFF7F7F7),
+          primaryColor: const Color(0xFF6F4E37),
+          fontFamily: GoogleFonts.montserrat().fontFamily,
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6F4E37)),
+          useMaterial3: true,
         ),
       ),
     );

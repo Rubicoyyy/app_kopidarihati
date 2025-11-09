@@ -1,117 +1,67 @@
 // Lokasi: lib/screens/home_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../data/database/app_db.dart';
-import '../widgets/category_tabs.dart';
-import '../widgets/header.dart';
-import '../widgets/product_card.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  // Terima 'child' (halaman yang akan ditampilkan)
+  final Widget child;
+  const HomePage({super.key, required this.child});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  late AppDatabase _db;
-  late Stream<List<Product>> _productStream;
-
-  int _currentIndex = 0;
-  String _selectedCategory = "All";
-  final List<String> categories = const ["All", "Coffee", "Tea", "Non Coffee", "Food and Snack"];
-  final currencyFormatter = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    _db = Provider.of<AppDatabase>(context, listen: false);
-    
-    // Panggil seedDatabase dari DAO
-    _db.productDao.seedDatabase(); 
-    
-    _updateProductStream();
+  // Fungsi untuk menentukan index yang aktif berdasarkan lokasi GoRouter
+  int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.toString();
+    if (location == '/') {
+      return 0;
+    }
+    if (location == '/menu') {
+      return 1;
+    }
+    if (location == '/favorite') {
+      return 2;
+    }
+    if (location == '/profile') {
+      return 3;
+    }
+    return 0; // Default
   }
 
-  void _updateProductStream() {
-    setState(() {
-      // Panggil fungsi watch dari DAO
-      _productStream = _db.productDao.watchProductsByCategory(_selectedCategory);
-    });
+  // Fungsi untuk pindah halaman saat item di-tap
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        context.go('/');
+        break;
+      case 1:
+        context.go('/menu');
+        break;
+      case 2:
+        context.go('/favorite');
+        break;
+      case 3:
+        context.go('/profile');
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const HeaderWidget(),
-            CategoryTabsWidget(
-              categories: categories,
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-                _updateProductStream();
-              },
-            ),
-            Expanded(
-              child: StreamBuilder<List<Product>>(
-                stream: _productStream,
-                builder: (context, snapshot) {
-                  final products = snapshot.data ?? [];
+      // Tampilkan halaman (child) yang dikirim oleh GoRouter
+      body: widget.child,
 
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (products.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "Menu untuk kategori '$_selectedCategory' belum tersedia.",
-                      ),
-                    );
-                  }
-
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: products.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.75,
-                        ),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return ProductCardWidget(product: product);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      // ===== KODE BOTTOMNAVIGATIONBAR YANG LENGKAP DIMASUKKAN DI SINI =====
+      // BottomNavigationBar sekarang dikendalikan oleh GoRouter
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _calculateSelectedIndex(context),
+        onTap: (index) => _onItemTapped(index, context),
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: const Color(0xFF44444E),
         type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: "Menu"),
@@ -119,7 +69,10 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.favorite),
             label: "Favorite",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.ballot_rounded),
+            label: "Riwayat",
+          ),
         ],
       ),
     );

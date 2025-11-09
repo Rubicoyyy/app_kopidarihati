@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart'; // <-- 1. IMPORT PROVIDER
 
 // Import model dari Drift
 import '../data/database/app_db.dart';
@@ -14,6 +15,9 @@ class ProductCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 2. AMBIL DATABASE DARI PROVIDER
+    final db = Provider.of<AppDatabase>(context, listen: false);
+
     return InkWell(
       onTap: () {
         // Kirim objek 'product' dari Drift langsung
@@ -41,16 +45,13 @@ class ProductCardWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                // ===== PERBAIKAN DI SINI =====
                 child: Image.asset(
                   product.image,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  // Tanda '}' yang berlebih sudah dihapus dari sini
                   errorBuilder: (context, error, stackTrace) =>
                       const Icon(Icons.broken_image, size: 40),
                 ),
-                // ===== AKHIR PERBAIKAN =====
               ),
             ),
             Expanded(
@@ -62,7 +63,7 @@ class ProductCardWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
-                      product.title, // Mengakses properti dari model Drift
+                      product.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -72,7 +73,7 @@ class ProductCardWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "Rp ${product.price.toStringAsFixed(0)}", // Mengakses properti dari model Drift
+                      "Rp ${product.price.toStringAsFixed(0)}",
                       style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold,
@@ -84,19 +85,36 @@ class ProductCardWidget extends StatelessWidget {
                         const Icon(Icons.star, color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          product.rating
-                              .toString(), // Mengakses properti dari model Drift
+                          product.rating.toString(),
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF44444E),
                           ),
                         ),
                         const Spacer(),
-                        Icon(
-                          Icons.favorite_border,
-                          color: Colors.red.shade400,
-                          size: 20,
+
+                        // ===== 3. PERUBAHAN UTAMA DI SINI =====
+                        // Ganti Icon statis menjadi IconButton dinamis
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: Icon(
+                            // Tampilkan ikon berdasarkan status dari database
+                            product.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            // Tampilkan warna berdasarkan status
+                            color: product.isFavorite
+                                ? Colors.red
+                                : Colors.red.shade400,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            // Panggil fungsi DAO saat ikon ditekan
+                            db.productDao.toggleFavoriteStatus(product);
+                          },
                         ),
+                        // ===== AKHIR PERUBAHAN =====
                       ],
                     ),
                   ],

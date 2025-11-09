@@ -5,14 +5,55 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-// Import model dari Drift
 import '../data/database/app_db.dart';
 import '../providers/cart_provider.dart';
 
-class DetailPage extends StatelessWidget {
+// 1. Ubah menjadi StatefulWidget
+class DetailPage extends StatefulWidget {
   final Product product;
-
   const DetailPage({super.key, required this.product});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  // 2. Buat state lokal untuk melacak status favorit
+  // Kita inisialisasi dengan nilai dari produk
+  late bool isFavorite;
+  late AppDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    // 3. Ambil nilai awal dari 'widget.product'
+    isFavorite = widget.product.isFavorite;
+    db = Provider.of<AppDatabase>(context, listen: false);
+  }
+
+  // 4. Buat fungsi untuk menangani toggle favorit
+  void _toggleFavorite() {
+    // Update database
+    db.productDao.toggleFavoriteStatus(widget.product);
+
+    // Update state lokal agar UI langsung berubah
+    setState(() {
+      isFavorite = !isFavorite;
+    });
+
+    // Tampilkan notifikasi
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isFavorite
+              ? '${widget.product.title} ditambahkan ke favorit!'
+              : '${widget.product.title} dihapus dari favorit.',
+        ),
+        duration: const Duration(seconds: 1),
+        backgroundColor: isFavorite ? Colors.pink : Colors.grey,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,43 +65,51 @@ class DetailPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // BAGIAN GAMBAR
-          Stack(
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.45,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(product.image),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(30),
-                  ),
+      // 5. Kita buat AppBar kustom agar bisa menaruh ikon di atas gambar
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: MediaQuery.of(context).size.height * 0.45,
+            pinned: true,
+            backgroundColor: Colors.white,
+            elevation: 1,
+            // Tombol Kembali
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.black.withOpacity(0.5),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
               ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black.withOpacity(0.5),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+            ),
+            // Tombol Favorit
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.black.withOpacity(0.5),
+                  child: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
                     ),
+                    onPressed: _toggleFavorite, // Panggil fungsi toggle
                   ),
                 ),
               ),
             ],
+            // Gambar Produk
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.asset(widget.product.image, fit: BoxFit.cover),
+            ),
           ),
 
-          // BAGIAN DETAIL TEKS
-          Expanded(
+          // 6. Konten Halaman (Bagian Detail Teks)
+          SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -71,7 +120,7 @@ class DetailPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          product.title,
+                          widget.product.title, // Gunakan 'widget.product'
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -83,7 +132,7 @@ class DetailPage extends StatelessWidget {
                           const Icon(Icons.star, color: Colors.amber, size: 24),
                           const SizedBox(width: 8),
                           Text(
-                            product.rating.toString(),
+                            widget.product.rating.toString(),
                             style: GoogleFonts.montserrat(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -96,38 +145,24 @@ class DetailPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     "Deskripsi",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
+                    // ... (Style Teks)
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Perpaduan sempurna antara espresso berkualitas tinggi dengan susu segar yang menghasilkan rasa lembut dan kaya. Pilihan ideal untuk memulai hari Anda atau sebagai teman bersantai di sore hari.",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
-
-                      color: Colors.grey[600],
-                      height: 1.5,
-                    ),
+                    "Perpaduan sempurna...",
+                    // ... (Style Teks)
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 24), // Beri jarak sebelum harga
+                  // Bagian Harga dan Tombol
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text("Harga"),
                           Text(
-                            "Harga",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          Text(
-                            currencyFormatter.format(product.price),
+                            currencyFormatter.format(widget.product.price),
                             style: GoogleFonts.montserrat(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -142,16 +177,8 @@ class DetailPage extends StatelessWidget {
                             context,
                             listen: false,
                           );
-                          cart.addItem(product);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${product.title} telah ditambahkan ke keranjang!',
-                              ),
-                              duration: const Duration(seconds: 2),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          cart.addItem(widget.product);
+                          // ... (Logika SnackBar 'Add to Cart')
                         },
                         icon: const Icon(
                           Icons.shopping_cart,
@@ -162,18 +189,7 @@ class DetailPage extends StatelessWidget {
                           style: TextStyle(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6F4E37),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          // ... (Style Tombol)
                         ),
                       ),
                     ],
