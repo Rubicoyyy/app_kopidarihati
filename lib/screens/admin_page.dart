@@ -1,0 +1,156 @@
+// Lokasi: lib/screens/admin_page.dart
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart'; // Penting untuk navigasi
+
+import '../data/database/app_db.dart';
+
+class AdminPage extends StatelessWidget {
+  const AdminPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = Provider.of<AppDatabase>(context, listen: false);
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Kelola Menu (Admin)',
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+      ),
+
+      // 1. Tampilkan Daftar Produk
+      body: StreamBuilder<List<Product>>(
+        // Memantau semua produk dari database
+        stream: db.productDao.watchAllProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final products = snapshot.data ?? [];
+
+          if (products.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.inbox, size: 60, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum ada produk.',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Tekan tombol + untuk menambah.'),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: AssetImage(product.image),
+                    onBackgroundImageError: (_, __) {
+                      // Fallback jika gambar tidak ditemukan
+                    },
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 16,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  title: Text(
+                    product.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${product.category} • ${currencyFormatter.format(product.price)}',
+                  ),
+
+                  // 2. Tombol Hapus
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () {
+                      _showDeleteConfirmation(context, db, product);
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+
+      // 3. Tombol Tambah Produk (+)
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // Pindah ke halaman tambah produk
+          context.push('/admin/add');
+        },
+        backgroundColor: const Color(0xFF6F4E37),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          "Tambah Produk",
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  // Fungsi helper untuk menampilkan dialog konfirmasi hapus
+  void _showDeleteConfirmation(
+    BuildContext context,
+    AppDatabase db,
+    Product product,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Konfirmasi Hapus'),
+        content: Text('Anda yakin ingin menghapus "${product.title}"?'),
+        actions: [
+          TextButton(
+            child: const Text('Batal'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+            onPressed: () {
+              // Panggil DAO untuk menghapus
+              db.productDao.deleteProduct(product);
+              Navigator.of(ctx).pop();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Produk berhasil dihapus.')),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}

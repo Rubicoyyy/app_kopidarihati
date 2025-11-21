@@ -1,5 +1,3 @@
-// Lokasi: lib/data/database/daos/product_dao.dart
-
 import 'package:drift/drift.dart';
 import '../app_db.dart';
 
@@ -9,11 +7,9 @@ part 'product_dao.g.dart';
 class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
   ProductDao(AppDatabase db) : super(db);
 
-  // === CREATE ===
   Future<int> insertProduct(Insertable<Product> product) =>
       into(products).insert(product);
 
-  // === READ ===
   Stream<List<Product>> watchAllProducts() => select(products).watch();
 
   Stream<List<Product>> watchFavoriteProducts() {
@@ -34,44 +30,33 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
 
   Stream<List<Product>> watchTopRatedProducts() {
     return (select(products)
-          // Urutkan berdasarkan rating, dari tertinggi (desc)
           ..orderBy([
             (tbl) =>
-                OrderingTerm(expression: tbl.rating, mode: OrderingMode.desc)
+                OrderingTerm(expression: tbl.rating, mode: OrderingMode.desc),
           ])
-          // Batasi hanya 5 produk teratas
           ..limit(5))
         .watch();
   }
 
-  // === UPDATE ===
   Future<bool> updateProduct(Insertable<Product> product) =>
       update(products).replace(product);
 
-  // ===== FUNGSI BARU UNTUK FITUR FAVORIT =====
   Future<void> toggleFavoriteStatus(Product product) {
-    // Buat objek pendamping (Companion) hanya dengan data yang ingin diubah
     final updatedProduct = ProductsCompanion(
-      id: Value(product.id), // Tentukan id produk yang akan diupdate
-      isFavorite: Value(!product.isFavorite), // Balik nilai isFavorite
+      id: Value(product.id),
+      isFavorite: Value(!product.isFavorite),
     );
 
-    // Jalankan perintah update di database
     return (update(
       products,
     )..where((tbl) => tbl.id.equals(product.id))).write(updatedProduct);
   }
-  // ===========================================
 
-  // === DELETE ===
   Future<int> deleteProduct(Insertable<Product> product) =>
       delete(products).delete(product);
 
-  // === SEEDING (Data Awal) ===
   Future<void> seedDatabase() async {
-    // 1. Siapkan daftar semua produk yang seharusnya ada
     final allProducts = [
-      // Kategori: Coffee
       ProductsCompanion.insert(
         title: "Café Latte",
         price: 25000,
@@ -93,7 +78,6 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
         rating: 4.8,
         category: 'Coffee',
       ),
-      // Kategori: Tea
       ProductsCompanion.insert(
         title: "Green Tea Latte",
         price: 22000,
@@ -101,7 +85,7 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
         rating: 4.9,
         category: 'Tea',
       ),
-      // Kategori: Food and Snack
+
       ProductsCompanion.insert(
         title: "Nasi Goreng Medan",
         price: 25000,
@@ -151,7 +135,7 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
         rating: 4.6,
         category: 'Food and Snack',
       ),
-      // Kategori: Non Coffee
+
       ProductsCompanion.insert(
         title: "Red Velvet (Ice)",
         price: 25000,
@@ -168,19 +152,15 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
       ),
     ];
 
-    // 2. Loop setiap produk di daftar
     for (final product in allProducts) {
-      // 3. Cek apakah produk dengan judul ini sudah ada di database
       final exists =
           await (select(products)
                 ..where((tbl) => tbl.title.equals(product.title.value)))
               .getSingleOrNull();
 
-      // 4. Jika 'exists' bernilai null (belum ada), maka masukkan
       if (exists == null) {
         await into(products).insert(product);
       }
-      // 5. Jika sudah ada, loop akan lanjut ke produk berikutnya (tidak melakukan apa-apa)
     }
   }
 }

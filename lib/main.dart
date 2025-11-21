@@ -1,41 +1,43 @@
 // Lokasi: lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'config/router.dart';
 import 'data/database/app_db.dart';
 import 'providers/cart_provider.dart';
-
-// ===== 1. IMPORT PAKET INTIL =====
-import 'package:intl/date_symbol_data_local.dart';
+import 'providers/login_provider.dart';
 
 void main() async {
-  // <-- 2. JADIKAN FUNGSI 'main' ASYNCHRONOUS
-  // ===== 3. TAMBAHKAN DUA BARIS INI =====
-  // Pastikan Flutter terinisialisasi
   WidgetsFlutterBinding.ensureInitialized();
-  // Muat data locale Indonesia (penting untuk format tanggal)
   await initializeDateFormatting('id_ID', null);
-  // ===================================
 
-  runApp(const KopiDariHatiApp());
+  final db = AppDatabase();
+  final loginProvider = LoginProvider(db);
+
+  runApp(KopiDariHatiApp(db: db, loginProvider: loginProvider));
 }
 
 class KopiDariHatiApp extends StatelessWidget {
-  const KopiDariHatiApp({super.key});
+  final AppDatabase db;
+  final LoginProvider loginProvider;
+
+  // ===== PERBAIKAN DI SINI: 'const' DIHAPUS =====
+  KopiDariHatiApp({super.key, required this.db, required this.loginProvider});
+  // ============================================
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AppDatabase>(
-          create: (context) => AppDatabase(),
-          dispose: (context, db) => db.close(),
-        ),
+        Provider<AppDatabase>.value(value: db),
+        ChangeNotifierProvider<LoginProvider>.value(value: loginProvider),
         ChangeNotifierProvider(create: (context) => CartProvider()),
       ],
       child: MaterialApp.router(
-        routerConfig: router,
+        routerConfig: AppRouter(loginProvider).router,
         debugShowCheckedModeBanner: false,
         title: 'Kopi Dari Hati',
         theme: ThemeData(
