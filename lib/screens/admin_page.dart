@@ -1,3 +1,4 @@
+import 'package:app_kopidarihati/widgets/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -67,7 +68,9 @@ class AdminPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: AssetImage(product.image),
+                    backgroundImage: (product.image?.isNotEmpty ?? false)
+                        ? NetworkImage(product.image!)
+                        : null,
                     onBackgroundImageError: (_, __) {
                     },
                     child: const Icon(

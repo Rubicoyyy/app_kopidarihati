@@ -15,7 +15,7 @@ dependencies:
   # ... (paket lain yang sudah ada seperti go_router, provider, dll)
   drift: ^2.18.0
   sqlite3_flutter_libs: ^0.5.21
-  path_provider: ^2.1.3
+  path_provider: ^2.1.5
   path: ^1.9.0
 
   google_fonts: ^6.2.1
@@ -38,4 +38,4 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
+    - assets/images/banner_promo.png

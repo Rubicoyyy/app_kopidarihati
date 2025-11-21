@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 
 import '../data/database/app_db.dart';
 import '../providers/cart_provider.dart';
+import '../widgets/universal_image.dart'; // Import UniversalImage
 
-// 1. Ubah menjadi StatefulWidget
 class DetailPage extends StatefulWidget {
   final Product product;
   const DetailPage({super.key, required this.product});
@@ -18,30 +18,21 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  // 2. Buat state lokal untuk melacak status favorit
-  // Kita inisialisasi dengan nilai dari produk
   late bool isFavorite;
   late AppDatabase db;
 
   @override
   void initState() {
     super.initState();
-    // 3. Ambil nilai awal dari 'widget.product'
     isFavorite = widget.product.isFavorite;
     db = Provider.of<AppDatabase>(context, listen: false);
   }
 
-  // 4. Buat fungsi untuk menangani toggle favorit
   void _toggleFavorite() {
-    // Update database
     db.productDao.toggleFavoriteStatus(widget.product);
-
-    // Update state lokal agar UI langsung berubah
     setState(() {
       isFavorite = !isFavorite;
     });
-
-    // Tampilkan notifikasi
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -65,7 +56,6 @@ class _DetailPageState extends State<DetailPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      // 5. Kita buat AppBar kustom agar bisa menaruh ikon di atas gambar
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -73,7 +63,6 @@ class _DetailPageState extends State<DetailPage> {
             pinned: true,
             backgroundColor: Colors.white,
             elevation: 1,
-            // Tombol Kembali
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
@@ -86,7 +75,6 @@ class _DetailPageState extends State<DetailPage> {
                 ),
               ),
             ),
-            // Tombol Favorit
             actions: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -97,18 +85,20 @@ class _DetailPageState extends State<DetailPage> {
                       isFavorite ? Icons.favorite : Icons.favorite_border,
                       color: isFavorite ? Colors.red : Colors.white,
                     ),
-                    onPressed: _toggleFavorite, // Panggil fungsi toggle
+                    onPressed: _toggleFavorite,
                   ),
                 ),
               ),
             ],
-            // Gambar Produk
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.asset(widget.product.image, fit: BoxFit.cover),
+              // PERBAIKAN DI SINI: Menggunakan UniversalImage dengan benar
+              background: UniversalImage(
+                widget.product.image,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
 
-          // 6. Konten Halaman (Bagian Detail Teks)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -120,7 +110,7 @@ class _DetailPageState extends State<DetailPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          widget.product.title, // Gunakan 'widget.product'
+                          widget.product.title,
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -145,15 +135,23 @@ class _DetailPageState extends State<DetailPage> {
                   const SizedBox(height: 16),
                   Text(
                     "Deskripsi",
-                    // ... (Style Teks)
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Perpaduan sempurna...",
-                    // ... (Style Teks)
+                    "Perpaduan sempurna antara espresso berkualitas tinggi dengan susu segar yang menghasilkan rasa lembut dan kaya.",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      height: 1.5,
+                    ),
                   ),
-                  const SizedBox(height: 24), // Beri jarak sebelum harga
-                  // Bagian Harga dan Tombol
+                  const SizedBox(height: 24),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -178,7 +176,15 @@ class _DetailPageState extends State<DetailPage> {
                             listen: false,
                           );
                           cart.addItem(widget.product);
-                          // ... (Logika SnackBar 'Add to Cart')
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${widget.product.title} ditambahkan ke keranjang!',
+                              ),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
                         },
                         icon: const Icon(
                           Icons.shopping_cart,
@@ -189,7 +195,14 @@ class _DetailPageState extends State<DetailPage> {
                           style: TextStyle(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
-                          // ... (Style Tombol)
+                          backgroundColor: const Color(0xFF6F4E37),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ],

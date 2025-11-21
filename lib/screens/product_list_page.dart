@@ -1,5 +1,3 @@
-// Lokasi: lib/screens/product_list_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +48,6 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ubah Scaffold menjadi SafeArea
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,16 +66,13 @@ class _ProductListPageState extends State<ProductListPage> {
           Expanded(
             child: StreamBuilder<List<Product>>(
               stream: _productStream,
-              // ===== BAGIAN BUILDER YANG LENGKAP ADA DI SINI =====
               builder: (context, snapshot) {
                 final products = snapshot.data ?? [];
 
-                // 1. Tampilkan loading
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // 2. Tampilkan pesan jika kosong
                 if (products.isEmpty) {
                   return Center(
                     child: Text(
@@ -87,7 +81,6 @@ class _ProductListPageState extends State<ProductListPage> {
                   );
                 }
 
-                // 3. Tampilkan GridView jika ada data
                 return GridView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: products.length,
@@ -103,7 +96,6 @@ class _ProductListPageState extends State<ProductListPage> {
                   },
                 );
               },
-              // ===== AKHIR DARI BAGIAN BUILDER =====
             ),
           ),
         ],

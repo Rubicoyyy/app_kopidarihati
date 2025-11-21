@@ -1,10 +1,7 @@
-// Lokasi: lib/screens/home_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // Import GoRouter
 
 class HomePage extends StatefulWidget {
-  // Terima 'child' (halaman yang akan ditampilkan)
   final Widget child;
   const HomePage({super.key, required this.child});
 
@@ -13,7 +10,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Fungsi untuk menentukan index yang aktif berdasarkan lokasi GoRouter
+  
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
     if (location == '/') {

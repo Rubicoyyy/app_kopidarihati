@@ -1,23 +1,19 @@
-// Lokasi: lib/screens/profile_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../providers/login_provider.dart'; // Menggunakan LoginProvider
+import '../providers/login_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Ambil LoginProvider
     final loginProvider = context.watch<LoginProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          // Tampilkan nama pengguna jika sudah login
           'Hi, ${loginProvider.currentUser?.username ?? 'Tamu'}',
           style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
         ),
@@ -27,7 +23,6 @@ class ProfilePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Tombol Riwayat Pesanan (Selalu terlihat)
           Card(
             child: ListTile(
               leading: const Icon(Icons.history, color: Color(0xFF6F4E37)),
@@ -40,7 +35,6 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           
-          // Tombol Admin (Hanya muncul jika peran-nya 'admin')
           if (loginProvider.isAdmin)
             Card(
               child: ListTile(
@@ -54,7 +48,6 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-          // Tombol Logout
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 12),

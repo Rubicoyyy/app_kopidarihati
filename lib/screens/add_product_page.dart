@@ -1,17 +1,19 @@
 // Lokasi: lib/screens/add_product_page.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-//import 'package:drift/drift.dart' as drift; // Kita butuh alias untuk 'Value' jika pakai Companion
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import '../data/database/app_db.dart';
+import '../widgets/universal_image.dart';
 
 class AddProductPage extends StatefulWidget {
-  // Terima parameter opsional: produk yang ingin diedit
   final Product? productToEdit;
-
   const AddProductPage({super.key, this.productToEdit});
 
   @override
@@ -20,36 +22,37 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
-  
-  late TextEditingController _titleController;
-  late TextEditingController _priceController;
-  late TextEditingController _imageController;
-  late TextEditingController _ratingController;
-  late String _selectedCategory;
 
-  // List kategori
-  final List<String> _categories = ['Coffee', 'Tea', 'Non Coffee', 'Food and Snack'];
+  // Controller
+  final _titleController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _imageController = TextEditingController(
+    text: 'assets/images/latte.jpg',
+  ); // <-- INI YANG HILANG
+  final _ratingController = TextEditingController(text: '4.5');
+
+  String _selectedCategory = 'Coffee';
+  final List<String> _categories = [
+    'Coffee',
+    'Tea',
+    'Non Coffee',
+    'Food and Snack',
+  ];
+
+  String? _selectedImagePath;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Cek apakah mode Edit atau Tambah Baru
     final product = widget.productToEdit;
-
     if (product != null) {
-      // === MODE EDIT: Isi form dengan data lama ===
-      _titleController = TextEditingController(text: product.title);
-      _priceController = TextEditingController(text: product.price.toStringAsFixed(0)); // Hapus desimal
-      _imageController = TextEditingController(text: product.image);
-      _ratingController = TextEditingController(text: product.rating.toString());
+      _titleController.text = product.title;
+      _priceController.text = product.price.toStringAsFixed(0);
+      _ratingController.text = product.rating.toString();
       _selectedCategory = product.category;
-    } else {
-      // === MODE TAMBAH BARU: Isi default ===
-      _titleController = TextEditingController();
-      _priceController = TextEditingController();
-      _imageController = TextEditingController(text: 'assets/images/latte.jpg');
-      _ratingController = TextEditingController(text: '4.5');
-      _selectedCategory = 'Coffee';
+      _selectedImagePath = product.image;
+      _imageController.text = product.image;
     }
   }
 
@@ -62,50 +65,66 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile != null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final String fileName = p.basename(pickedFile.path);
+      final String localImagePath = '${directory.path}/$fileName';
+      final File localImage = await File(pickedFile.path).copy(localImagePath);
+
+      if (mounted) {
+        setState(() {
+          _selectedImagePath = localImage.path;
+          _imageController.text = localImage.path;
+        });
+      }
+    }
+  }
+
   void _saveProduct() {
     if (_formKey.currentState!.validate()) {
+      // Gunakan path dari controller jika user mengetik manual, atau dari picker
+      final imagePath = _selectedImagePath ?? _imageController.text;
+
       final db = Provider.of<AppDatabase>(context, listen: false);
       final title = _titleController.text;
       final price = double.parse(_priceController.text);
-      final image = _imageController.text;
       final rating = double.parse(_ratingController.text);
 
       if (widget.productToEdit != null) {
-        // === LOGIKA UPDATE ===
-        // Kita buat objek Product baru dengan ID yang sama
         final updatedProduct = Product(
-          id: widget.productToEdit!.id, // PENTING: ID tidak boleh berubah
+          id: widget.productToEdit!.id,
           title: title,
           price: price,
-          image: image,
+          image: imagePath,
           rating: rating,
           category: _selectedCategory,
-          isFavorite: widget.productToEdit!.isFavorite, // Pertahankan status favorit
+          isFavorite: widget.productToEdit!.isFavorite,
         );
-
         db.productDao.updateProduct(updatedProduct);
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produk berhasil diperbarui!'), backgroundColor: Colors.blue),
-        );
       } else {
-        // === LOGIKA INSERT ===
         db.productDao.insertProduct(
           ProductsCompanion.insert(
             title: title,
             price: price,
-            image: image,
+            image: imagePath,
             rating: rating,
             category: _selectedCategory,
           ),
         );
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produk berhasil ditambahkan!'), backgroundColor: Colors.green),
-        );
       }
 
-      context.pop(); // Kembali ke halaman Admin
+      context.pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produk berhasil disimpan!'),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
   }
 
@@ -116,8 +135,8 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isEditing ? 'Edit Produk' : 'Tambah Produk Baru', 
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)
+          isEditing ? 'Edit Produk' : 'Tambah Produk Baru',
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
@@ -127,47 +146,100 @@ class _AddProductPageState extends State<AddProductPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey),
+                ),
+                child:
+                    (_selectedImagePath != null ||
+                        _imageController.text.isNotEmpty)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: UniversalImage(
+                          _selectedImagePath ?? _imageController.text,
+                        ),
+                      )
+                    : const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text("Tekan untuk pilih gambar"),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Nama Produk', border: OutlineInputBorder(), prefixIcon: Icon(Icons.coffee)),
+              decoration: const InputDecoration(
+                labelText: 'Nama Produk',
+                border: OutlineInputBorder(),
+              ),
               validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _priceController,
-              decoration: const InputDecoration(labelText: 'Harga (Rp)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.monetization_on)),
+              decoration: const InputDecoration(
+                labelText: 'Harga (Rp)',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
               validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
-              decoration: const InputDecoration(labelText: 'Kategori', border: OutlineInputBorder(), prefixIcon: Icon(Icons.category)),
-              items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+              decoration: const InputDecoration(
+                labelText: 'Kategori',
+                border: OutlineInputBorder(),
+              ),
+              items: _categories
+                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                  .toList(),
               onChanged: (v) => setState(() => _selectedCategory = v!),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _imageController,
-              decoration: const InputDecoration(labelText: 'Path Gambar', hintText: 'assets/images/...', border: OutlineInputBorder(), prefixIcon: Icon(Icons.image)),
-              validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+              decoration: const InputDecoration(
+                labelText: 'Path Gambar (Text)',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (v) => setState(() {
+                _selectedImagePath = v;
+              }),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _ratingController,
-              decoration: const InputDecoration(labelText: 'Rating', border: OutlineInputBorder(), prefixIcon: Icon(Icons.star)),
+              decoration: const InputDecoration(
+                labelText: 'Rating',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _saveProduct,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isEditing ? Colors.blue : const Color(0xFF6F4E37),
+                backgroundColor: const Color(0xFF6F4E37),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: Text(
-                isEditing ? 'UPDATE PRODUK' : 'SIMPAN PRODUK',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                'SIMPAN PRODUK',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],

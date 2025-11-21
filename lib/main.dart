@@ -1,10 +1,7 @@
-// Lokasi: lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
 import 'config/router.dart';
 import 'data/database/app_db.dart';
 import 'providers/cart_provider.dart';
@@ -24,9 +21,7 @@ class KopiDariHatiApp extends StatelessWidget {
   final AppDatabase db;
   final LoginProvider loginProvider;
 
-  // ===== PERBAIKAN DI SINI: 'const' DIHAPUS =====
   KopiDariHatiApp({super.key, required this.db, required this.loginProvider});
-  // ============================================
 
   @override
   Widget build(BuildContext context) {

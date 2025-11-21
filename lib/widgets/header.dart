@@ -1,10 +1,7 @@
-// Lokasi: lib/widgets/header.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart'; // Import GoRouter
-
+import 'package:go_router/go_router.dart'; 
 import '../providers/cart_provider.dart';
 
 class HeaderWidget extends StatelessWidget {
@@ -28,19 +25,15 @@ class HeaderWidget extends StatelessWidget {
           ),
           Row(
             children: [
-              // ===== 1. TOMBOL SEARCH =====
               IconButton(
                 icon: const Icon(Icons.search, color: Color(0xFF37353E)),
                 onPressed: () {
-                  // Pindah ke halaman Search
                   context.push('/search');
                 },
               ),
 
-              // ===========================
               const SizedBox(width: 8),
 
-              // ===== 2. TOMBOL CART (KERANJANG) =====
               Consumer<CartProvider>(
                 builder: (context, cart, child) => Stack(
                   clipBehavior: Clip.none,

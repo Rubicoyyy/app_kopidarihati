@@ -1,5 +1,3 @@
-// Lokasi: lib/screens/search_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +12,6 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  // Controller untuk menangani teks yang diketik
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -41,7 +38,6 @@ class _SearchPageState extends State<SearchPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        // Kolom Input Pencarian
         title: TextField(
           controller: _searchController,
           autofocus: true, // Keyboard langsung muncul
@@ -52,14 +48,12 @@ class _SearchPageState extends State<SearchPage> {
             hintStyle: TextStyle(color: Colors.grey),
           ),
           onChanged: (value) {
-            // Update pencarian setiap kali user mengetik
             setState(() {
               _searchQuery = value;
             });
           },
         ),
         actions: [
-          // Tombol hapus teks
           if (_searchQuery.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear, color: Colors.grey),
@@ -87,7 +81,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             )
           : StreamBuilder<List<Product>>(
-              // Memanggil fungsi searchProducts dari DAO
               stream: db.productDao.searchProducts(_searchQuery),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

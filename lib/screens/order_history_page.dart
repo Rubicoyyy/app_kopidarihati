@@ -1,10 +1,7 @@
-// Lokasi: lib/screens/order_history_page.dart
-
 import 'package:app_kopidarihati/models/full_order_details.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-// PERBAIKAN: Path import ini sudah benar
 import 'package:provider/provider.dart';
 import '../data/database/app_db.dart';
 
@@ -19,7 +16,6 @@ class OrderHistoryPage extends StatelessWidget {
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    // Formatter untuk tanggal (Contoh: 09 Nov 2025, 14:30)
     final dateFormatter = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
 
     return Scaffold(
@@ -49,7 +45,6 @@ class OrderHistoryPage extends StatelessWidget {
             );
           }
 
-          // Tampilkan daftar pesanan
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: orders.length,
@@ -57,12 +52,10 @@ class OrderHistoryPage extends StatelessWidget {
               final fullOrder = orders[index];
               final order = fullOrder.order;
 
-              // Gunakan ExpansionTile untuk setiap pesanan
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
                 clipBehavior: Clip.antiAlias,
                 child: ExpansionTile(
-                  // Bagian Judul (Ringkasan Pesanan)
                   title: Text(
                     'Pesanan a.n. ${order.customerName}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -77,7 +70,6 @@ class OrderHistoryPage extends StatelessWidget {
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
-                  // Bagian Anak (Detail Item)
                   children: fullOrder.items.map((item) {
                     return ListTile(
                       leading: CircleAvatar(

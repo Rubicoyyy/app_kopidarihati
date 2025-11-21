@@ -1,5 +1,6 @@
 // Lokasi: lib/screens/cart_page.dart
 
+import 'package:app_kopidarihati/widgets/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -88,9 +89,9 @@ class _CartPageState extends State<CartPage> {
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: AssetImage(
-                                cartItem.product.image,
-                              ),
+                              backgroundImage: cartItem.product.image.startsWith('http')
+                                  ? NetworkImage(cartItem.product.image)
+                                  : AssetImage(cartItem.product.image) as ImageProvider,
                             ),
                             title: Text(
                               cartItem.product.title,

@@ -1,5 +1,4 @@
-// Lokasi: lib/screens/dashboard_page.dart
-
+import 'package:app_kopidarihati/widgets/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -24,10 +23,8 @@ class DashboardPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header Aplikasi
           const HeaderWidget(),
 
-          // 2. Banner/Promo Area
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -40,7 +37,7 @@ class DashboardPage extends StatelessWidget {
                 color: Theme.of(context).primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
                 image: const DecorationImage(
-                  image: AssetImage('assets/images/banner_promo.jpg'),
+                  image: AssetImage('assets/images/banner_promo.png'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -138,12 +135,10 @@ class DashboardPage extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                child: Image.asset(
+                child: UniversalImage(
                   product.image,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 40),
                 ),
               ),
             ),

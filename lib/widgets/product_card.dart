@@ -1,26 +1,20 @@
-// Lokasi: lib/widgets/product_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart'; // <-- 1. IMPORT PROVIDER
-
-// Import model dari Drift
+import 'package:provider/provider.dart';
 import '../data/database/app_db.dart';
+import 'universal_image.dart';
 
 class ProductCardWidget extends StatelessWidget {
-  // Sekarang widget ini menerima Product dari Drift
   final Product product;
 
   const ProductCardWidget({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    // 2. AMBIL DATABASE DARI PROVIDER
     final db = Provider.of<AppDatabase>(context, listen: false);
 
     return InkWell(
       onTap: () {
-        // Kirim objek 'product' dari Drift langsung
         context.push('/product-detail', extra: product);
       },
       borderRadius: BorderRadius.circular(16),
@@ -45,12 +39,10 @@ class ProductCardWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                child: Image.asset(
+                child: UniversalImage(
                   product.image,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 40),
                 ),
               ),
             ),
@@ -93,28 +85,22 @@ class ProductCardWidget extends StatelessWidget {
                         ),
                         const Spacer(),
 
-                        // ===== 3. PERUBAHAN UTAMA DI SINI =====
-                        // Ganti Icon statis menjadi IconButton dinamis
                         IconButton(
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           icon: Icon(
-                            // Tampilkan ikon berdasarkan status dari database
                             product.isFavorite
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            // Tampilkan warna berdasarkan status
                             color: product.isFavorite
                                 ? Colors.red
                                 : Colors.red.shade400,
                             size: 20,
                           ),
                           onPressed: () {
-                            // Panggil fungsi DAO saat ikon ditekan
                             db.productDao.toggleFavoriteStatus(product);
                           },
                         ),
-                        // ===== AKHIR PERUBAHAN =====
                       ],
                     ),
                   ],
