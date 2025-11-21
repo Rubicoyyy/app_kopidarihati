@@ -17,7 +17,8 @@ import '../screens/favorite_page.dart';
 import '../screens/order_history_page.dart';
 import '../screens/add_product_page.dart';
 import '../screens/profile_page.dart';
-import '../screens/add_product_page.dart'; // <-- IMPORT HALAMAN BARU
+import '../screens/admin_page.dart';
+import '../screens/search_page.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -70,13 +71,23 @@ class AppRouter {
         // Rute Tambah Produk Baru
         GoRoute(
           path: '/admin/add',
-          builder: (context, state) => AddProductPage(),
+          builder: (context, state) {
+            // Cek apakah ada data produk yang dikirim?
+            final productToEdit = state.extra as Product?;
+            // Kirim ke halaman (bisa null jika tambah baru, atau ada isinya jika edit)
+            return AddProductPage(productToEdit: productToEdit);
+          },
         ),
 
         // ======================
         GoRoute(
           path: '/order-history',
           builder: (context, state) => OrderHistoryPage(),
+        ),
+
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchPage(),
         ),
 
         // Rute Shell (Dengan Navigasi Bawah)

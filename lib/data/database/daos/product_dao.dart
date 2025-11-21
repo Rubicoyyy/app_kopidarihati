@@ -38,6 +38,12 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
         .watch();
   }
 
+  Stream<List<Product>> searchProducts(String query) {
+    return (select(
+      products,
+    )..where((tbl) => tbl.title.like('%$query%'))).watch();
+  }
+
   Future<bool> updateProduct(Insertable<Product> product) =>
       update(products).replace(product);
 

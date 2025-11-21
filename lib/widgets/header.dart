@@ -1,9 +1,11 @@
+// Lokasi: lib/widgets/header.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import '../providers/cart_provider.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
 
+import '../providers/cart_provider.dart';
 
 class HeaderWidget extends StatelessWidget {
   const HeaderWidget({super.key});
@@ -26,24 +28,32 @@ class HeaderWidget extends StatelessWidget {
           ),
           Row(
             children: [
-              const Icon(Icons.search, color: Color(0xFF37353E)),
-              const SizedBox(width: 12),
-              // ===== WIDGET KERANJANG BARU =====
+              // ===== 1. TOMBOL SEARCH =====
+              IconButton(
+                icon: const Icon(Icons.search, color: Color(0xFF37353E)),
+                onPressed: () {
+                  // Pindah ke halaman Search
+                  context.push('/search');
+                },
+              ),
+
+              // ===========================
+              const SizedBox(width: 8),
+
+              // ===== 2. TOMBOL CART (KERANJANG) =====
               Consumer<CartProvider>(
                 builder: (context, cart, child) => Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Ikon keranjang yang bisa diklik
                     IconButton(
                       icon: const Icon(
                         Icons.shopping_cart_outlined,
                         color: Color(0xFF37353E),
                       ),
                       onPressed: () {
-                         context.push('/cart');
+                        context.push('/cart');
                       },
                     ),
-                    // Badge notifikasi (hanya muncul jika ada item)
                     if (cart.itemCount > 0)
                       Positioned(
                         top: 5,

@@ -1,11 +1,8 @@
-// Lokasi: lib/screens/admin_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart'; // Penting untuk navigasi
-
+import 'package:go_router/go_router.dart'; 
 import '../data/database/app_db.dart';
 
 class AdminPage extends StatelessWidget {
@@ -30,9 +27,7 @@ class AdminPage extends StatelessWidget {
         elevation: 1,
       ),
 
-      // 1. Tampilkan Daftar Produk
       body: StreamBuilder<List<Product>>(
-        // Memantau semua produk dari database
         stream: db.productDao.watchAllProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,7 +69,6 @@ class AdminPage extends StatelessWidget {
                   leading: CircleAvatar(
                     backgroundImage: AssetImage(product.image),
                     onBackgroundImageError: (_, __) {
-                      // Fallback jika gambar tidak ditemukan
                     },
                     child: const Icon(
                       Icons.image_not_supported,
@@ -90,12 +84,28 @@ class AdminPage extends StatelessWidget {
                     '${product.category} • ${currencyFormatter.format(product.price)}',
                   ),
 
-                  // 2. Tombol Hapus
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () {
-                      _showDeleteConfirmation(context, db, product);
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // TOMBOL EDIT
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          // Pindah ke halaman form sambil membawa data produk ini
+                          context.push('/admin/add', extra: product);
+                        },
+                      ),
+                      // TOMBOL HAPUS (LAMA)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          _showDeleteConfirmation(context, db, product);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               );
