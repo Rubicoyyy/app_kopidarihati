@@ -14,6 +14,8 @@ void main() async {
   final db = AppDatabase();
   final loginProvider = LoginProvider(db);
 
+  await loginProvider.init();
+
   runApp(KopiDariHatiApp(db: db, loginProvider: loginProvider));
 }
 

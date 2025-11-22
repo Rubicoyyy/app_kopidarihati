@@ -42,13 +42,11 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
               child: Center(
-                // ... (Teks Promo)
               ),
             ),
           ),
           const SizedBox(height: 16),
 
-          // 3. Section Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -62,7 +60,6 @@ class DashboardPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 4. Daftar Produk Terpopuler
           Expanded(
             child: StreamBuilder<List<Product>>(
               stream: db.productDao.watchTopRatedProducts(),
@@ -82,7 +79,6 @@ class DashboardPage extends StatelessWidget {
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
-                    // Kirim 'db' ke widget build kartu
                     return _buildPopularProductCard(
                       context,
                       product,
@@ -100,7 +96,6 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  // Widget terpisah untuk membangun kartu produk populer
   Widget _buildPopularProductCard(
     BuildContext context,
     Product product,
@@ -168,8 +163,6 @@ class DashboardPage extends StatelessWidget {
                         ),
                         const Spacer(),
 
-                        // ===== PERUBAHAN UTAMA DI SINI =====
-                        // Ganti Icon statis menjadi IconButton dinamis
                         IconButton(
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -183,11 +176,9 @@ class DashboardPage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () {
-                            // Panggil fungsi DAO saat ikon ditekan
                             db.productDao.toggleFavoriteStatus(product);
                           },
                         ),
-                        // ===== AKHIR PERUBAHAN =====
                       ],
                     ),
                   ],

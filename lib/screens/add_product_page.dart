@@ -1,5 +1,3 @@
-// Lokasi: lib/screens/add_product_page.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:drift/drift.dart' as drift;
 
 import '../data/database/app_db.dart';
 import '../widgets/universal_image.dart';
@@ -23,13 +22,15 @@ class AddProductPage extends StatefulWidget {
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controller
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
   final _imageController = TextEditingController(
     text: 'assets/images/latte.jpg',
-  ); // <-- INI YANG HILANG
+  );
   final _ratingController = TextEditingController(text: '4.5');
+  // ===== CONTROLLER BARU =====
+  final _descController = TextEditingController();
+  // ==========================
 
   String _selectedCategory = 'Coffee';
   final List<String> _categories = [
@@ -53,6 +54,7 @@ class _AddProductPageState extends State<AddProductPage> {
       _selectedCategory = product.category;
       _selectedImagePath = product.image;
       _imageController.text = product.image;
+      _descController.text = product.description;
     }
   }
 
@@ -62,6 +64,7 @@ class _AddProductPageState extends State<AddProductPage> {
     _priceController.dispose();
     _imageController.dispose();
     _ratingController.dispose();
+    _descController.dispose(); // Dispose controller baru
     super.dispose();
   }
 
@@ -87,15 +90,16 @@ class _AddProductPageState extends State<AddProductPage> {
 
   void _saveProduct() {
     if (_formKey.currentState!.validate()) {
-      // Gunakan path dari controller jika user mengetik manual, atau dari picker
       final imagePath = _selectedImagePath ?? _imageController.text;
-
       final db = Provider.of<AppDatabase>(context, listen: false);
+
       final title = _titleController.text;
       final price = double.parse(_priceController.text);
       final rating = double.parse(_ratingController.text);
+      final description = _descController.text; // Ambil deskripsi
 
       if (widget.productToEdit != null) {
+        // UPDATE
         final updatedProduct = Product(
           id: widget.productToEdit!.id,
           title: title,
@@ -104,9 +108,11 @@ class _AddProductPageState extends State<AddProductPage> {
           rating: rating,
           category: _selectedCategory,
           isFavorite: widget.productToEdit!.isFavorite,
+          description: description, // Simpan deskripsi
         );
         db.productDao.updateProduct(updatedProduct);
       } else {
+        // INSERT
         db.productDao.insertProduct(
           ProductsCompanion.insert(
             title: title,
@@ -114,6 +120,7 @@ class _AddProductPageState extends State<AddProductPage> {
             image: imagePath,
             rating: rating,
             category: _selectedCategory,
+            description: drift.Value(description), // Simpan deskripsi
           ),
         );
       }
@@ -169,13 +176,13 @@ class _AddProductPageState extends State<AddProductPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
-                          SizedBox(height: 8),
                           Text("Tekan untuk pilih gambar"),
                         ],
                       ),
               ),
             ),
             const SizedBox(height: 24),
+
             TextFormField(
               controller: _titleController,
               decoration: const InputDecoration(
@@ -185,6 +192,22 @@ class _AddProductPageState extends State<AddProductPage> {
               validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
             ),
             const SizedBox(height: 16),
+
+            // ===== INPUT DESKRIPSI BARU =====
+            TextFormField(
+              controller: _descController,
+              decoration: const InputDecoration(
+                labelText: 'Deskripsi Menu',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true, // Agar label di atas untuk multiline
+              ),
+              maxLines: 4, // Kotak lebih besar
+              keyboardType: TextInputType.multiline,
+              validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+            ),
+            const SizedBox(height: 16),
+
+            // ===============================
             TextFormField(
               controller: _priceController,
               decoration: const InputDecoration(
@@ -195,6 +218,7 @@ class _AddProductPageState extends State<AddProductPage> {
               validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
             ),
             const SizedBox(height: 16),
+
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: const InputDecoration(
@@ -207,17 +231,7 @@ class _AddProductPageState extends State<AddProductPage> {
               onChanged: (v) => setState(() => _selectedCategory = v!),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _imageController,
-              decoration: const InputDecoration(
-                labelText: 'Path Gambar (Text)',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (v) => setState(() {
-                _selectedImagePath = v;
-              }),
-            ),
-            const SizedBox(height: 16),
+
             TextFormField(
               controller: _ratingController,
               decoration: const InputDecoration(
@@ -227,6 +241,7 @@ class _AddProductPageState extends State<AddProductPage> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 32),
+
             ElevatedButton(
               onPressed: _saveProduct,
               style: ElevatedButton.styleFrom(
@@ -234,7 +249,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: Text(
-                'SIMPAN PRODUK',
+                isEditing ? 'UPDATE PRODUK' : 'SIMPAN PRODUK',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

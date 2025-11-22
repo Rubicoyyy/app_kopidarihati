@@ -87,6 +87,18 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Deskripsi belum tersedia.'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -96,6 +108,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     rating,
     category,
     isFavorite,
+    description,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -158,6 +171,15 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
       );
     }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -195,6 +217,10 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_favorite'],
       )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
     );
   }
 
@@ -212,6 +238,7 @@ class Product extends DataClass implements Insertable<Product> {
   final double rating;
   final String category;
   final bool isFavorite;
+  final String description;
   const Product({
     required this.id,
     required this.title,
@@ -220,6 +247,7 @@ class Product extends DataClass implements Insertable<Product> {
     required this.rating,
     required this.category,
     required this.isFavorite,
+    required this.description,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -231,6 +259,7 @@ class Product extends DataClass implements Insertable<Product> {
     map['rating'] = Variable<double>(rating);
     map['category'] = Variable<String>(category);
     map['is_favorite'] = Variable<bool>(isFavorite);
+    map['description'] = Variable<String>(description);
     return map;
   }
 
@@ -243,6 +272,7 @@ class Product extends DataClass implements Insertable<Product> {
       rating: Value(rating),
       category: Value(category),
       isFavorite: Value(isFavorite),
+      description: Value(description),
     );
   }
 
@@ -259,6 +289,7 @@ class Product extends DataClass implements Insertable<Product> {
       rating: serializer.fromJson<double>(json['rating']),
       category: serializer.fromJson<String>(json['category']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      description: serializer.fromJson<String>(json['description']),
     );
   }
   @override
@@ -272,6 +303,7 @@ class Product extends DataClass implements Insertable<Product> {
       'rating': serializer.toJson<double>(rating),
       'category': serializer.toJson<String>(category),
       'isFavorite': serializer.toJson<bool>(isFavorite),
+      'description': serializer.toJson<String>(description),
     };
   }
 
@@ -283,6 +315,7 @@ class Product extends DataClass implements Insertable<Product> {
     double? rating,
     String? category,
     bool? isFavorite,
+    String? description,
   }) => Product(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -291,6 +324,7 @@ class Product extends DataClass implements Insertable<Product> {
     rating: rating ?? this.rating,
     category: category ?? this.category,
     isFavorite: isFavorite ?? this.isFavorite,
+    description: description ?? this.description,
   );
   Product copyWithCompanion(ProductsCompanion data) {
     return Product(
@@ -303,6 +337,9 @@ class Product extends DataClass implements Insertable<Product> {
       isFavorite: data.isFavorite.present
           ? data.isFavorite.value
           : this.isFavorite,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
     );
   }
 
@@ -315,14 +352,23 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('image: $image, ')
           ..write('rating: $rating, ')
           ..write('category: $category, ')
-          ..write('isFavorite: $isFavorite')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, price, image, rating, category, isFavorite);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    price,
+    image,
+    rating,
+    category,
+    isFavorite,
+    description,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -333,7 +379,8 @@ class Product extends DataClass implements Insertable<Product> {
           other.image == this.image &&
           other.rating == this.rating &&
           other.category == this.category &&
-          other.isFavorite == this.isFavorite);
+          other.isFavorite == this.isFavorite &&
+          other.description == this.description);
 }
 
 class ProductsCompanion extends UpdateCompanion<Product> {
@@ -344,6 +391,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<double> rating;
   final Value<String> category;
   final Value<bool> isFavorite;
+  final Value<String> description;
   const ProductsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -352,6 +400,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.rating = const Value.absent(),
     this.category = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.description = const Value.absent(),
   });
   ProductsCompanion.insert({
     this.id = const Value.absent(),
@@ -361,6 +410,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     required double rating,
     required String category,
     this.isFavorite = const Value.absent(),
+    this.description = const Value.absent(),
   }) : title = Value(title),
        price = Value(price),
        image = Value(image),
@@ -374,6 +424,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<double>? rating,
     Expression<String>? category,
     Expression<bool>? isFavorite,
+    Expression<String>? description,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -383,6 +434,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (rating != null) 'rating': rating,
       if (category != null) 'category': category,
       if (isFavorite != null) 'is_favorite': isFavorite,
+      if (description != null) 'description': description,
     });
   }
 
@@ -394,6 +446,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<double>? rating,
     Value<String>? category,
     Value<bool>? isFavorite,
+    Value<String>? description,
   }) {
     return ProductsCompanion(
       id: id ?? this.id,
@@ -403,6 +456,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       rating: rating ?? this.rating,
       category: category ?? this.category,
       isFavorite: isFavorite ?? this.isFavorite,
+      description: description ?? this.description,
     );
   }
 
@@ -430,6 +484,9 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
     return map;
   }
 
@@ -442,7 +499,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('image: $image, ')
           ..write('rating: $rating, ')
           ..write('category: $category, ')
-          ..write('isFavorite: $isFavorite')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
@@ -499,6 +557,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _orderDateMeta = const VerificationMeta(
     'orderDate',
   );
@@ -510,13 +579,25 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<int> status = GeneratedColumn<int>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     customerName,
     tableNumber,
     totalAmount,
+    paymentMethod,
     orderDate,
+    status,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -566,6 +647,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     } else if (isInserting) {
       context.missing(_totalAmountMeta);
     }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_paymentMethodMeta);
+    }
     if (data.containsKey('order_date')) {
       context.handle(
         _orderDateMeta,
@@ -573,6 +665,12 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
       );
     } else if (isInserting) {
       context.missing(_orderDateMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     }
     return context;
   }
@@ -599,9 +697,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         DriftSqlType.double,
         data['${effectivePrefix}total_amount'],
       )!,
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      )!,
       orderDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}order_date'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}status'],
       )!,
     );
   }
@@ -617,13 +723,17 @@ class Order extends DataClass implements Insertable<Order> {
   final String customerName;
   final String tableNumber;
   final double totalAmount;
+  final String paymentMethod;
   final DateTime orderDate;
+  final int status;
   const Order({
     required this.id,
     required this.customerName,
     required this.tableNumber,
     required this.totalAmount,
+    required this.paymentMethod,
     required this.orderDate,
+    required this.status,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -632,7 +742,9 @@ class Order extends DataClass implements Insertable<Order> {
     map['customer_name'] = Variable<String>(customerName);
     map['table_number'] = Variable<String>(tableNumber);
     map['total_amount'] = Variable<double>(totalAmount);
+    map['payment_method'] = Variable<String>(paymentMethod);
     map['order_date'] = Variable<DateTime>(orderDate);
+    map['status'] = Variable<int>(status);
     return map;
   }
 
@@ -642,7 +754,9 @@ class Order extends DataClass implements Insertable<Order> {
       customerName: Value(customerName),
       tableNumber: Value(tableNumber),
       totalAmount: Value(totalAmount),
+      paymentMethod: Value(paymentMethod),
       orderDate: Value(orderDate),
+      status: Value(status),
     );
   }
 
@@ -656,7 +770,9 @@ class Order extends DataClass implements Insertable<Order> {
       customerName: serializer.fromJson<String>(json['customerName']),
       tableNumber: serializer.fromJson<String>(json['tableNumber']),
       totalAmount: serializer.fromJson<double>(json['totalAmount']),
+      paymentMethod: serializer.fromJson<String>(json['paymentMethod']),
       orderDate: serializer.fromJson<DateTime>(json['orderDate']),
+      status: serializer.fromJson<int>(json['status']),
     );
   }
   @override
@@ -667,7 +783,9 @@ class Order extends DataClass implements Insertable<Order> {
       'customerName': serializer.toJson<String>(customerName),
       'tableNumber': serializer.toJson<String>(tableNumber),
       'totalAmount': serializer.toJson<double>(totalAmount),
+      'paymentMethod': serializer.toJson<String>(paymentMethod),
       'orderDate': serializer.toJson<DateTime>(orderDate),
+      'status': serializer.toJson<int>(status),
     };
   }
 
@@ -676,13 +794,17 @@ class Order extends DataClass implements Insertable<Order> {
     String? customerName,
     String? tableNumber,
     double? totalAmount,
+    String? paymentMethod,
     DateTime? orderDate,
+    int? status,
   }) => Order(
     id: id ?? this.id,
     customerName: customerName ?? this.customerName,
     tableNumber: tableNumber ?? this.tableNumber,
     totalAmount: totalAmount ?? this.totalAmount,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
     orderDate: orderDate ?? this.orderDate,
+    status: status ?? this.status,
   );
   Order copyWithCompanion(OrdersCompanion data) {
     return Order(
@@ -696,7 +818,11 @@ class Order extends DataClass implements Insertable<Order> {
       totalAmount: data.totalAmount.present
           ? data.totalAmount.value
           : this.totalAmount,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
       orderDate: data.orderDate.present ? data.orderDate.value : this.orderDate,
+      status: data.status.present ? data.status.value : this.status,
     );
   }
 
@@ -707,14 +833,23 @@ class Order extends DataClass implements Insertable<Order> {
           ..write('customerName: $customerName, ')
           ..write('tableNumber: $tableNumber, ')
           ..write('totalAmount: $totalAmount, ')
-          ..write('orderDate: $orderDate')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('orderDate: $orderDate, ')
+          ..write('status: $status')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, customerName, tableNumber, totalAmount, orderDate);
+  int get hashCode => Object.hash(
+    id,
+    customerName,
+    tableNumber,
+    totalAmount,
+    paymentMethod,
+    orderDate,
+    status,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -723,7 +858,9 @@ class Order extends DataClass implements Insertable<Order> {
           other.customerName == this.customerName &&
           other.tableNumber == this.tableNumber &&
           other.totalAmount == this.totalAmount &&
-          other.orderDate == this.orderDate);
+          other.paymentMethod == this.paymentMethod &&
+          other.orderDate == this.orderDate &&
+          other.status == this.status);
 }
 
 class OrdersCompanion extends UpdateCompanion<Order> {
@@ -731,37 +868,48 @@ class OrdersCompanion extends UpdateCompanion<Order> {
   final Value<String> customerName;
   final Value<String> tableNumber;
   final Value<double> totalAmount;
+  final Value<String> paymentMethod;
   final Value<DateTime> orderDate;
+  final Value<int> status;
   const OrdersCompanion({
     this.id = const Value.absent(),
     this.customerName = const Value.absent(),
     this.tableNumber = const Value.absent(),
     this.totalAmount = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     this.orderDate = const Value.absent(),
+    this.status = const Value.absent(),
   });
   OrdersCompanion.insert({
     this.id = const Value.absent(),
     required String customerName,
     required String tableNumber,
     required double totalAmount,
+    required String paymentMethod,
     required DateTime orderDate,
+    this.status = const Value.absent(),
   }) : customerName = Value(customerName),
        tableNumber = Value(tableNumber),
        totalAmount = Value(totalAmount),
+       paymentMethod = Value(paymentMethod),
        orderDate = Value(orderDate);
   static Insertable<Order> custom({
     Expression<int>? id,
     Expression<String>? customerName,
     Expression<String>? tableNumber,
     Expression<double>? totalAmount,
+    Expression<String>? paymentMethod,
     Expression<DateTime>? orderDate,
+    Expression<int>? status,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (customerName != null) 'customer_name': customerName,
       if (tableNumber != null) 'table_number': tableNumber,
       if (totalAmount != null) 'total_amount': totalAmount,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
       if (orderDate != null) 'order_date': orderDate,
+      if (status != null) 'status': status,
     });
   }
 
@@ -770,14 +918,18 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Value<String>? customerName,
     Value<String>? tableNumber,
     Value<double>? totalAmount,
+    Value<String>? paymentMethod,
     Value<DateTime>? orderDate,
+    Value<int>? status,
   }) {
     return OrdersCompanion(
       id: id ?? this.id,
       customerName: customerName ?? this.customerName,
       tableNumber: tableNumber ?? this.tableNumber,
       totalAmount: totalAmount ?? this.totalAmount,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       orderDate: orderDate ?? this.orderDate,
+      status: status ?? this.status,
     );
   }
 
@@ -796,8 +948,14 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     if (totalAmount.present) {
       map['total_amount'] = Variable<double>(totalAmount.value);
     }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
     if (orderDate.present) {
       map['order_date'] = Variable<DateTime>(orderDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<int>(status.value);
     }
     return map;
   }
@@ -809,7 +967,9 @@ class OrdersCompanion extends UpdateCompanion<Order> {
           ..write('customerName: $customerName, ')
           ..write('tableNumber: $tableNumber, ')
           ..write('totalAmount: $totalAmount, ')
-          ..write('orderDate: $orderDate')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('orderDate: $orderDate, ')
+          ..write('status: $status')
           ..write(')'))
         .toString();
   }
@@ -1498,6 +1658,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
       required double rating,
       required String category,
       Value<bool> isFavorite,
+      Value<String> description,
     });
 typedef $$ProductsTableUpdateCompanionBuilder =
     ProductsCompanion Function({
@@ -1508,6 +1669,7 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<double> rating,
       Value<String> category,
       Value<bool> isFavorite,
+      Value<String> description,
     });
 
 final class $$ProductsTableReferences
@@ -1574,6 +1736,11 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1646,6 +1813,11 @@ class $$ProductsTableOrderingComposer
     column: $table.isFavorite,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProductsTableAnnotationComposer
@@ -1677,6 +1849,11 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => column,
   );
 
@@ -1741,6 +1918,7 @@ class $$ProductsTableTableManager
                 Value<double> rating = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
+                Value<String> description = const Value.absent(),
               }) => ProductsCompanion(
                 id: id,
                 title: title,
@@ -1749,6 +1927,7 @@ class $$ProductsTableTableManager
                 rating: rating,
                 category: category,
                 isFavorite: isFavorite,
+                description: description,
               ),
           createCompanionCallback:
               ({
@@ -1759,6 +1938,7 @@ class $$ProductsTableTableManager
                 required double rating,
                 required String category,
                 Value<bool> isFavorite = const Value.absent(),
+                Value<String> description = const Value.absent(),
               }) => ProductsCompanion.insert(
                 id: id,
                 title: title,
@@ -1767,6 +1947,7 @@ class $$ProductsTableTableManager
                 rating: rating,
                 category: category,
                 isFavorite: isFavorite,
+                description: description,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -1829,7 +2010,9 @@ typedef $$OrdersTableCreateCompanionBuilder =
       required String customerName,
       required String tableNumber,
       required double totalAmount,
+      required String paymentMethod,
       required DateTime orderDate,
+      Value<int> status,
     });
 typedef $$OrdersTableUpdateCompanionBuilder =
     OrdersCompanion Function({
@@ -1837,7 +2020,9 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<String> customerName,
       Value<String> tableNumber,
       Value<double> totalAmount,
+      Value<String> paymentMethod,
       Value<DateTime> orderDate,
+      Value<int> status,
     });
 
 final class $$OrdersTableReferences
@@ -1892,8 +2077,18 @@ class $$OrdersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get orderDate => $composableBuilder(
     column: $table.orderDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get status => $composableBuilder(
+    column: $table.status,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1952,8 +2147,18 @@ class $$OrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get orderDate => $composableBuilder(
     column: $table.orderDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get status => $composableBuilder(
+    column: $table.status,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1985,8 +2190,16 @@ class $$OrdersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get orderDate =>
       $composableBuilder(column: $table.orderDate, builder: (column) => column);
+
+  GeneratedColumn<int> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
 
   Expression<T> orderItemsRefs<T extends Object>(
     Expression<T> Function($$OrderItemsTableAnnotationComposer a) f,
@@ -2046,13 +2259,17 @@ class $$OrdersTableTableManager
                 Value<String> customerName = const Value.absent(),
                 Value<String> tableNumber = const Value.absent(),
                 Value<double> totalAmount = const Value.absent(),
+                Value<String> paymentMethod = const Value.absent(),
                 Value<DateTime> orderDate = const Value.absent(),
+                Value<int> status = const Value.absent(),
               }) => OrdersCompanion(
                 id: id,
                 customerName: customerName,
                 tableNumber: tableNumber,
                 totalAmount: totalAmount,
+                paymentMethod: paymentMethod,
                 orderDate: orderDate,
+                status: status,
               ),
           createCompanionCallback:
               ({
@@ -2060,13 +2277,17 @@ class $$OrdersTableTableManager
                 required String customerName,
                 required String tableNumber,
                 required double totalAmount,
+                required String paymentMethod,
                 required DateTime orderDate,
+                Value<int> status = const Value.absent(),
               }) => OrdersCompanion.insert(
                 id: id,
                 customerName: customerName,
                 tableNumber: tableNumber,
                 totalAmount: totalAmount,
+                paymentMethod: paymentMethod,
                 orderDate: orderDate,
+                status: status,
               ),
           withReferenceMapper: (p0) => p0
               .map(

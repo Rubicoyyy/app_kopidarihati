@@ -1,3 +1,5 @@
+// Lokasi: lib/screens/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Ambil LoginProvider
     final loginProvider = context.watch<LoginProvider>();
 
     return Scaffold(
@@ -23,11 +26,27 @@ class ProfilePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // ===== 1. AREA CUSTOMER (Semua bisa lihat) =====
+          
+          // Tombol Edit Profil
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('Edit Profil', style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: const Text('Ubah username & password'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                context.push('/profile/edit');
+              },
+            ),
+          ),
+          
+          // Tombol Riwayat Pesanan
           Card(
             child: ListTile(
               leading: const Icon(Icons.history, color: Color(0xFF6F4E37)),
               title: const Text('Riwayat Pesanan', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Lihat semua pesanan Anda sebelumnya'),
+              subtitle: const Text('Lihat status pesanan Anda'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 context.push('/order-history');
@@ -35,12 +54,26 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           
-          if (loginProvider.isAdmin)
+          const SizedBox(height: 12),
+
+          // ===== 2. AREA KHUSUS ADMIN (Hanya Admin yang bisa lihat) =====
+          if (loginProvider.isAdmin) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "Area Admin",
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold, color: Colors.grey),
+              ),
+            ),
+            
+            // Tombol Kelola Menu
             Card(
+              color: Colors.orange.shade50, // Warna beda biar jelas
               child: ListTile(
                 leading: const Icon(Icons.admin_panel_settings, color: Colors.blueGrey),
-                title: const Text('Kelola Menu (Admin)', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Tambah, hapus, atau edit menu'),
+                title: const Text('Kelola Menu', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: const Text('Tambah/Hapus Produk'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   context.push('/admin');
@@ -48,16 +81,33 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
+            // Tombol Dapur (Pesanan Masuk)
+            Card(
+              color: Colors.orange.shade50, // Warna beda biar jelas
+              child: ListTile(
+                leading: const Icon(Icons.restaurant_menu, color: Colors.orange),
+                title: const Text('Dapur (Pesanan)', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: const Text('Proses pesanan masuk'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  context.push('/admin/orders');
+                },
+              ),
+            ),
+          ],
+          // ==========================================================
+
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 12),
+          
+          // Tombol Logout
           Card(
             color: Colors.red.shade50,
             child: ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
               onTap: () {
-                // Panggil fungsi logout
                 context.read<LoginProvider>().logout();
               },
             ),

@@ -1,21 +1,13 @@
-// Lokasi: lib/data/database/app_db.dart
-
 import 'dart:io';
-// ===== INI IMPORT YANG HILANG =====
 import 'package:drift/drift.dart';
-// ===================================
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-
-// Import semua DAO
 import 'daos/product_dao.dart';
 import 'daos/order_dao.dart';
 import 'daos/user_dao.dart';
 
-part 'app_db.g.dart'; // File generated
-
-// --- DEFINISI TABEL ---
+part 'app_db.g.dart';
 
 @DataClassName('Product')
 class Products extends Table {
@@ -26,6 +18,8 @@ class Products extends Table {
   RealColumn get rating => real()();
   TextColumn get category => text()();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  TextColumn get description =>
+      text().withDefault(const Constant('Deskripsi belum tersedia.'))();
 }
 
 @DataClassName('Order')
@@ -34,7 +28,9 @@ class Orders extends Table {
   TextColumn get customerName => text()();
   TextColumn get tableNumber => text()();
   RealColumn get totalAmount => real()();
+  TextColumn get paymentMethod => text()();
   DateTimeColumn get orderDate => dateTime()();
+  IntColumn get status => integer().withDefault(const Constant(0))();
 }
 
 @DataClassName('OrderItem')
@@ -51,10 +47,8 @@ class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get username => text().unique()();
   TextColumn get password => text()();
-  TextColumn get role => text()(); // "admin" atau "customer"
+  TextColumn get role => text()();
 }
-
-// --- KELAS DATABASE UTAMA ---
 
 @DriftDatabase(
   tables: [Products, Orders, OrderItems, Users],
@@ -62,19 +56,18 @@ class Users extends Table {
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 5; // Versi 5
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onUpgrade: (migrator, from, to) async {
-        // Hapus semua tabel lama
         for (final table in allTables) {
           await migrator.deleteTable(table.actualTableName);
         }
-        // Buat ulang semua tabel baru
         await migrator.createAll();
       },
     );

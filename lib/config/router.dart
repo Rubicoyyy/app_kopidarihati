@@ -1,11 +1,7 @@
-// Lokasi: lib/config/router.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../data/database/app_db.dart';
 import '../providers/login_provider.dart';
-
-// Import semua halaman
 import '../screens/login_page.dart';
 import '../screens/cart_page.dart';
 import '../screens/confirmation_page.dart';
@@ -19,6 +15,9 @@ import '../screens/add_product_page.dart';
 import '../screens/profile_page.dart';
 import '../screens/admin_page.dart';
 import '../screens/search_page.dart';
+import '../screens/register_page.dart';
+import '../screens/edit_profile_page.dart';
+import '../screens/admin_order_page.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -37,27 +36,35 @@ class AppRouter {
         final bool isLoggedIn = loginProvider.isLoggedIn;
         final String location = state.uri.toString();
 
-        // Jika BELUM login dan TIDAK di halaman login -> Lempar ke Login
-        if (!isLoggedIn && location != '/login') {
+        final bool isLoggingIn = location == '/login';
+        final bool isRegistering = location == '/register';
+
+        if (!isLoggedIn && !isLoggingIn && !isRegistering) {
           return '/login';
         }
-        // Jika SUDAH login dan MASIH di halaman login -> Lempar ke Home
-        if (isLoggedIn && location == '/login') {
+
+        if (isLoggedIn && (isLoggingIn || isRegistering)) {
           return '/';
         }
+
         return null;
       },
 
       routes: [
-        // Rute Login
         GoRoute(path: '/login', builder: (context, state) => LoginPage()),
 
-        // Rute-rute Standalone (Tanpa Navigasi Bawah)
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterPage(),
+        ),
+
         GoRoute(path: '/cart', builder: (context, state) => CartPage()),
+
         GoRoute(
           path: '/confirmation',
           builder: (context, state) => ConfirmationPage(),
         ),
+
         GoRoute(
           path: '/product-detail',
           builder: (context, state) {
@@ -66,20 +73,25 @@ class AppRouter {
           },
         ),
 
-        // ===== RUTE ADMIN =====
         GoRoute(path: '/admin', builder: (context, state) => AdminPage()),
-        // Rute Tambah Produk Baru
         GoRoute(
           path: '/admin/add',
           builder: (context, state) {
-            // Cek apakah ada data produk yang dikirim?
             final productToEdit = state.extra as Product?;
-            // Kirim ke halaman (bisa null jika tambah baru, atau ada isinya jika edit)
             return AddProductPage(productToEdit: productToEdit);
           },
         ),
 
-        // ======================
+        GoRoute(
+          path: '/admin/orders',
+          builder: (context, state) => const AdminOrderPage(),
+        ),
+
+        GoRoute(
+          path: '/profile/edit',
+          builder: (context, state) => const EditProfilePage(),
+        ),
+
         GoRoute(
           path: '/order-history',
           builder: (context, state) => OrderHistoryPage(),
@@ -90,7 +102,6 @@ class AppRouter {
           builder: (context, state) => const SearchPage(),
         ),
 
-        // Rute Shell (Dengan Navigasi Bawah)
         ShellRoute(
           navigatorKey: _shellNavigatorKey,
           builder: (context, state, child) {

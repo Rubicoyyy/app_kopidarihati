@@ -1,14 +1,11 @@
-// Lokasi: lib/screens/cart_page.dart
-
-import 'package:app_kopidarihati/widgets/universal_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-
 import '../providers/cart_provider.dart';
 import '../data/database/app_db.dart';
+import '../widgets/universal_image.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -20,6 +17,10 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final _nameController = TextEditingController();
   final _tableController = TextEditingController();
+
+  // State untuk Metode Pembayaran
+  String _selectedPaymentMethod = 'Tunai';
+  final List<String> _paymentMethods = ['Tunai', 'QRIS', 'Transfer Bank'];
 
   @override
   void dispose() {
@@ -36,7 +37,6 @@ class _CartPageState extends State<CartPage> {
       decimalDigits: 0,
     );
 
-    // Kita ambil 'cart' di sini agar bisa diakses di luar Consumer
     final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
@@ -57,14 +57,13 @@ class _CartPageState extends State<CartPage> {
             )
           : Column(
               children: [
-                // ===== 1. DAFTAR ITEM DI KERANJANG =====
+                // 1. LIST ITEM
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: cart.items.length,
                     itemBuilder: (context, index) {
                       final cartItem = cart.items.values.toList()[index];
-
                       return Dismissible(
                         key: ValueKey(cartItem.id),
                         onDismissed: (direction) {
@@ -72,7 +71,7 @@ class _CartPageState extends State<CartPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${cartItem.product.title} telah dihapus.',
+                                '${cartItem.product.title} dihapus.',
                               ),
                               backgroundColor: Colors.red,
                             ),
@@ -80,18 +79,21 @@ class _CartPageState extends State<CartPage> {
                         },
                         background: Container(
                           color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20.0),
-                          margin: const EdgeInsets.only(bottom: 12),
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: cartItem.product.image.startsWith('http')
-                                  ? NetworkImage(cartItem.product.image)
-                                  : AssetImage(cartItem.product.image) as ImageProvider,
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: UniversalImage(
+                                  cartItem.product.image,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                             title: Text(
                               cartItem.product.title,
@@ -112,29 +114,20 @@ class _CartPageState extends State<CartPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.remove_circle_outline,
-                                    size: 22,
-                                  ),
-                                  onPressed: () {
-                                    cart.decreaseQuantity(cartItem.product);
-                                  },
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () =>
+                                      cart.decreaseQuantity(cartItem.product),
                                 ),
                                 Text(
                                   '${cartItem.quantity}',
                                   style: const TextStyle(
-                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.add_circle_outline,
-                                    size: 22,
-                                  ),
-                                  onPressed: () {
-                                    cart.addItem(cartItem.product);
-                                  },
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () =>
+                                      cart.addItem(cartItem.product),
                                 ),
                               ],
                             ),
@@ -145,7 +138,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
 
-                // ===== 2. TOTAL DAN FORM PEMESANAN (YANG HILANG) =====
+                // 2. FORM PEMESANAN
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: const BoxDecoration(
@@ -180,6 +173,30 @@ class _CartPageState extends State<CartPage> {
                         ),
                         keyboardType: TextInputType.number,
                       ),
+                      const SizedBox(height: 12),
+
+                      // ===== DROPDOWN PEMBAYARAN =====
+                      DropdownButtonFormField<String>(
+                        value: _selectedPaymentMethod,
+                        decoration: const InputDecoration(
+                          labelText: 'Metode Pembayaran',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.payment),
+                        ),
+                        items: _paymentMethods.map((String method) {
+                          return DropdownMenuItem<String>(
+                            value: method,
+                            child: Text(method),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedPaymentMethod = newValue!;
+                          });
+                        },
+                      ),
+
+                      // ===============================
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,24 +242,24 @@ class _CartPageState extends State<CartPage> {
                           ).orderDao.createOrderAndItems(
                             customerName,
                             tableNumber,
+                            _selectedPaymentMethod, // <-- Kirim Data Pembayaran
                             cart.items.values.toList(),
                           );
 
                           cart.clearCart();
-
                           context.go('/confirmation');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF6F4E37),
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: GoogleFonts.montserrat(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
                         ),
                         child: const Text(
                           'Pesan Sekarang',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

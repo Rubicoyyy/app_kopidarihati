@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart'; 
+import 'package:go_router/go_router.dart';
 import '../data/database/app_db.dart';
 
 class AdminPage extends StatelessWidget {
@@ -67,16 +67,12 @@ class AdminPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: (product.image?.isNotEmpty ?? false)
-                        ? NetworkImage(product.image!)
-                        : null,
-                    onBackgroundImageError: (_, __) {
-                    },
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      size: 16,
-                      color: Colors.transparent,
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(50), // Membuatnya bulat
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: UniversalImage(product.image, fit: BoxFit.cover),
                     ),
                   ),
                   title: Text(

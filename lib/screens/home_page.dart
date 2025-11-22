@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // Import GoRouter
+import 'package:go_router/go_router.dart'; 
 
 class HomePage extends StatefulWidget {
   final Widget child;
@@ -10,7 +10,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
     if (location == '/') {
@@ -25,10 +24,9 @@ class _HomePageState extends State<HomePage> {
     if (location == '/profile') {
       return 3;
     }
-    return 0; // Default
+    return 0; 
   }
 
-  // Fungsi untuk pindah halaman saat item di-tap
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
@@ -49,10 +47,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tampilkan halaman (child) yang dikirim oleh GoRouter
       body: widget.child,
-
-      // BottomNavigationBar sekarang dikendalikan oleh GoRouter
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _calculateSelectedIndex(context),
         onTap: (index) => _onItemTapped(index, context),
@@ -66,10 +61,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.favorite),
             label: "Favorite",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.ballot_rounded),
-            label: "Riwayat",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

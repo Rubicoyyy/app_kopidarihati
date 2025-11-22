@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../data/database/app_db.dart';
+import '../widgets/universal_image.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -100,8 +101,18 @@ class _SearchPageState extends State<SearchPage> {
                   itemBuilder: (context, index) {
                     final product = results[index];
                     return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: AssetImage(product.image),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          50,
+                        ), // Membuat bulat
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: UniversalImage(
+                            product.image,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                       title: Text(
                         product.title,

@@ -91,7 +91,6 @@ class _DetailPageState extends State<DetailPage> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              // PERBAIKAN DI SINI: Menggunakan UniversalImage dengan benar
               background: UniversalImage(
                 widget.product.image,
                 fit: BoxFit.cover,
@@ -141,9 +140,8 @@ class _DetailPageState extends State<DetailPage> {
                       color: Colors.grey[800],
                     ),
                   ),
-                  const SizedBox(height: 8),
                   Text(
-                    "Perpaduan sempurna antara espresso berkualitas tinggi dengan susu segar yang menghasilkan rasa lembut dan kaya.",
+                    widget.product.description, // <-- PANGGIL DARI DATABASE
                     style: GoogleFonts.montserrat(
                       fontSize: 14,
                       color: Colors.grey[600],

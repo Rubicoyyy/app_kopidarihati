@@ -1,5 +1,3 @@
-// Lokasi: lib/data/database/daos/user_dao.dart
-
 import 'package:drift/drift.dart';
 import '../app_db.dart';
 
@@ -9,8 +7,6 @@ part 'user_dao.g.dart';
 class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   UserDao(AppDatabase db) : super(db);
 
-  // Fungsi untuk Login
-  // Mengembalikan User jika sukses, null jika gagal
   Future<User?> login(String username, String password) async {
     return (select(users)..where(
           (tbl) =>
@@ -19,16 +15,16 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
         .getSingleOrNull();
   }
 
-  // Fungsi untuk Seeding (Membuat akun default)
+  Future<bool> updateUser(User user) => update(users).replace(user);
+
   Future<void> seedDefaultUsers() async {
     final userCount = await (select(users).get()).then((value) => value.length);
     if (userCount == 0) {
-      // Buat 1 Admin dan 1 Customer
       await batch((batch) {
         batch.insertAll(users, [
           UsersCompanion.insert(
             username: 'admin',
-            password: '123', // Peringatan: SANGAT TIDAK AMAN
+            password: '123', 
             role: 'admin',
           ),
           UsersCompanion.insert(
@@ -39,5 +35,23 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
         ]);
       });
     }
+  }
+
+  Future<bool> registerUser(String username, String password) async {
+    final existingUser = await (select(users)
+          ..where((tbl) => tbl.username.equals(username)))
+        .getSingleOrNull();
+
+    if (existingUser != null) {
+      return false; 
+    }
+
+    await into(users).insert(UsersCompanion.insert(
+      username: username,
+      password: password,
+      role: 'customer', 
+    ));
+    
+    return true; 
   }
 }

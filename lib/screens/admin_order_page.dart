@@ -1,15 +1,13 @@
-// Lokasi: lib/screens/order_history_page.dart
-
-import 'package:app_kopidarihati/models/full_order_details.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../data/database/app_db.dart';
-import '../widgets/universal_image.dart';
+import '../models/full_order_details.dart';
+import '../widgets/universal_image.dart'; 
 
-class OrderHistoryPage extends StatelessWidget {
-  const OrderHistoryPage({super.key});
+class AdminOrderPage extends StatelessWidget {
+  const AdminOrderPage({super.key});
 
   String _getStatusText(int status) {
     switch (status) {
@@ -49,12 +47,12 @@ class OrderHistoryPage extends StatelessWidget {
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    final dateFormatter = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
+    final dateFormatter = DateFormat('dd MMM HH:mm', 'id_ID');
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Riwayat Pesanan',
+          'Dapur (Pesanan Masuk)',
           style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -70,12 +68,7 @@ class OrderHistoryPage extends StatelessWidget {
           final orders = snapshot.data ?? [];
 
           if (orders.isEmpty) {
-            return Center(
-              child: Text(
-                'Belum ada riwayat pesanan.',
-                style: GoogleFonts.montserrat(fontSize: 16, color: Colors.grey),
-              ),
-            );
+            return const Center(child: Text('Belum ada pesanan masuk.'));
           }
 
           return ListView.builder(
@@ -87,16 +80,14 @@ class OrderHistoryPage extends StatelessWidget {
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
-                clipBehavior: Clip.antiAlias,
                 child: ExpansionTile(
                   title: Row(
                     children: [
                       Text(
-                        'Order #${order.id}',
+                        '#${order.id} ${order.customerName}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
-                      // Label Status (Hanya Tampilan, Tidak Bisa Diklik)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -126,47 +117,88 @@ class OrderHistoryPage extends StatelessWidget {
                       Text(
                         'Meja: ${order.tableNumber} • ${dateFormatter.format(order.orderDate)}',
                       ),
+
+                      const SizedBox(height: 4),
+
                       Text(
-                        'Metode: ${order.paymentMethod}',
+                        'Total: ${currencyFormatter.format(order.totalAmount)}', 
                         style: TextStyle(
-                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
-                    ],
-                  ),
-                  trailing: Text(
-                    currencyFormatter.format(order.totalAmount),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  children: fullOrder.items.map((item) {
-                    return ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: UniversalImage(
-                            item.product.image,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      title: Text(item.product.title),
-                      subtitle: Text(
-                        '${item.orderItem.quantity} x ${currencyFormatter.format(item.orderItem.itemPrice)}',
-                      ),
-                      trailing: Text(
-                        currencyFormatter.format(
-                          item.orderItem.quantity * item.orderItem.itemPrice,
-                        ),
+                      Text(
+                        'Metode: ${order.paymentMethod}', 
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
-                    );
-                  }).toList(),
+                      
+                    ],
+                  ),
+                  children: [
+                    // Daftar Item
+                    ...fullOrder.items.map(
+                      (item) => ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: UniversalImage(
+                              item.product.image,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        title: Text(item.product.title),
+                        trailing: Text('${item.orderItem.quantity}x'),
+                        dense: true,
+                      ),
+                    ),
+
+                    const Divider(),
+
+                    // Tombol Aksi Admin
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          if (order.status == 0)
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.coffee_maker, size: 16),
+                              label: const Text("Proses"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () =>
+                                  db.orderDao.updateOrderStatus(order.id, 1),
+                            ),
+                          if (order.status == 1)
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.check_circle, size: 16),
+                              label: const Text("Selesai"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () =>
+                                  db.orderDao.updateOrderStatus(order.id, 2),
+                            ),
+                          if (order.status != 3 && order.status != 2)
+                            TextButton.icon(
+                              icon: const Icon(Icons.cancel, size: 16),
+                              label: const Text("Tolak"),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              onPressed: () =>
+                                  db.orderDao.updateOrderStatus(order.id, 3),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

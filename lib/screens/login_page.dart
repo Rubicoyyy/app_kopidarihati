@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart'; // Pastikan ini ada
 import '../providers/login_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,9 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
   Future<void> _attemptLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() { _isLoading = true; });
 
     final loginProvider = context.read<LoginProvider>();
     final success = await loginProvider.login(
@@ -29,11 +28,8 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (mounted) {
-      // Pastikan widget masih ada
-      setState(() {
-        _isLoading = false;
-      });
-
+      setState(() { _isLoading = false; });
+      
       if (!success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -42,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
-      // Jika sukses, router akan otomatis mengalihkan
+      // Jika sukses, router akan otomatis mengalihkan (diurus oleh redirect di router.dart)
     }
   }
 
@@ -55,11 +51,14 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch, // Agar tombol full width
             children: [
+              const SizedBox(height: 40),
               Text(
                 'Kopi Dari Hati',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: 36,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF6F4E37),
                 ),
@@ -67,12 +66,15 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 8),
               Text(
                 'Silakan login untuk melanjutkan',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.grey[700],
                 ),
               ),
               const SizedBox(height: 48),
+              
+              // Input Username
               TextField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
@@ -82,6 +84,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 16),
+              
+              // Input Password
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -92,13 +96,15 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 32),
+              
+              // Tombol Login
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: _attemptLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6F4E37),
-                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -106,16 +112,47 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Login',
                         style: GoogleFonts.montserrat(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                     ),
+              
               const SizedBox(height: 24),
+              
+              // --- BAGIAN DAFTAR AKUN ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Belum punya akun? "),
+                  InkWell( // Gunakan InkWell atau TextButton agar area sentuh lebih jelas
+                    onTap: () {
+                      // Debug print untuk memastikan tombol ditekan
+                      print("Tombol Daftar ditekan!"); 
+                      context.push('/register');
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0), // Padding agar mudah disentuh
+                      child: Text(
+                        "Daftar di sini",
+                        style: TextStyle(
+                          color: Color(0xFF6F4E37),
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline, // Garis bawah agar terlihat seperti link
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // --------------------------
+
+              const SizedBox(height: 16),
               Text(
-                'Hint: Coba "admin" / "123" atau "customer" / "123"',
-                style: GoogleFonts.montserrat(color: Colors.grey),
+                'Hint: Coba "admin" / "123" ...',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.montserrat(color: Colors.grey, fontSize: 12),
               ),
             ],
           ),

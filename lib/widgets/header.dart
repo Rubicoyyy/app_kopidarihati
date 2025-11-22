@@ -14,7 +14,6 @@ class HeaderWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.menu, color: Color(0xFF37353E)),
           Text(
             "Kopi Dari Hati",
             style: GoogleFonts.playfairDisplay(
