@@ -68,7 +68,7 @@ class AdminPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(50), // Membuatnya bulat
+                    borderRadius: BorderRadius.circular(50), 
                     child: SizedBox(
                       width: 50,
                       height: 50,
@@ -113,10 +113,8 @@ class AdminPage extends StatelessWidget {
         },
       ),
 
-      // 3. Tombol Tambah Produk (+)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Pindah ke halaman tambah produk
           context.push('/admin/add');
         },
         backgroundColor: const Color(0xFF6F4E37),
@@ -129,7 +127,6 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  // Fungsi helper untuk menampilkan dialog konfirmasi hapus
   void _showDeleteConfirmation(
     BuildContext context,
     AppDatabase db,

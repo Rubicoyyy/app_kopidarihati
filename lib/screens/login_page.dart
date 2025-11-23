@@ -1,9 +1,7 @@
-// Lokasi: lib/screens/login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart'; // Pastikan ini ada
+import 'package:go_router/go_router.dart'; 
 import '../providers/login_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -38,7 +36,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
-      // Jika sukses, router akan otomatis mengalihkan (diurus oleh redirect di router.dart)
     }
   }
 
@@ -51,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch, // Agar tombol full width
+            crossAxisAlignment: CrossAxisAlignment.stretch, 
             children: [
               const SizedBox(height: 40),
               Text(
@@ -121,25 +118,23 @@ class _LoginPageState extends State<LoginPage> {
               
               const SizedBox(height: 24),
               
-              // --- BAGIAN DAFTAR AKUN ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Belum punya akun? "),
-                  InkWell( // Gunakan InkWell atau TextButton agar area sentuh lebih jelas
+                  InkWell( 
                     onTap: () {
-                      // Debug print untuk memastikan tombol ditekan
                       print("Tombol Daftar ditekan!"); 
                       context.push('/register');
                     },
                     child: const Padding(
-                      padding: EdgeInsets.all(8.0), // Padding agar mudah disentuh
+                      padding: EdgeInsets.all(8.0), 
                       child: Text(
                         "Daftar di sini",
                         style: TextStyle(
                           color: Color(0xFF6F4E37),
                           fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline, // Garis bawah agar terlihat seperti link
+                          decoration: TextDecoration.underline, 
                         ),
                       ),
                     ),

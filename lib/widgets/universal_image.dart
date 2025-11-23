@@ -1,5 +1,3 @@
-// Lokasi: lib/widgets/universal_image.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -19,7 +17,6 @@ class UniversalImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Jika path dimulai dengan 'assets/', gunakan Image.asset
     if (path.startsWith('assets/') || path.startsWith('assets\\')) {
       return Image.asset(
         path,
@@ -29,7 +26,6 @@ class UniversalImage extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => _errorWidget(),
       );
     } 
-    // Jika tidak, asumsikan itu adalah File lokal dari HP/Komputer
     else {
       return Image.file(
         File(path),

@@ -44,6 +44,14 @@ class KopiDariHatiApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6F4E37)),
           useMaterial3: true,
         ),
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: child,
+          );
+        },
       ),
     );
   }

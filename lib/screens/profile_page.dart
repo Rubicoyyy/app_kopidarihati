@@ -1,5 +1,3 @@
-// Lokasi: lib/screens/profile_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +9,6 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Ambil LoginProvider
     final loginProvider = context.watch<LoginProvider>();
 
     return Scaffold(
@@ -28,7 +25,6 @@ class ProfilePage extends StatelessWidget {
         children: [
           // ===== 1. AREA CUSTOMER (Semua bisa lihat) =====
           
-          // Tombol Edit Profil
           Card(
             child: ListTile(
               leading: const Icon(Icons.edit, color: Colors.blue),
@@ -69,7 +65,7 @@ class ProfilePage extends StatelessWidget {
             
             // Tombol Kelola Menu
             Card(
-              color: Colors.orange.shade50, // Warna beda biar jelas
+              color: Colors.orange.shade50, 
               child: ListTile(
                 leading: const Icon(Icons.admin_panel_settings, color: Colors.blueGrey),
                 title: const Text('Kelola Menu', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -83,7 +79,7 @@ class ProfilePage extends StatelessWidget {
 
             // Tombol Dapur (Pesanan Masuk)
             Card(
-              color: Colors.orange.shade50, // Warna beda biar jelas
+              color: Colors.orange.shade50, 
               child: ListTile(
                 leading: const Icon(Icons.restaurant_menu, color: Colors.orange),
                 title: const Text('Dapur (Pesanan)', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -95,7 +91,6 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
           ],
-          // ==========================================================
 
           const SizedBox(height: 24),
           const Divider(),

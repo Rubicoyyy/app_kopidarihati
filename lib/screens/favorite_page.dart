@@ -1,9 +1,7 @@
-// Lokasi: lib/screens/favorite_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/database/app_db.dart';
-import '../widgets/product_card.dart'; // Kita gunakan ulang widget kartu
+import '../widgets/product_card.dart'; 
 
 class FavoritePage extends StatelessWidget {
   const FavoritePage({super.key});
@@ -19,7 +17,6 @@ class FavoritePage extends StatelessWidget {
         elevation: 1,
       ),
       body: StreamBuilder<List<Product>>(
-        // Buat stream baru di DAO (akan kita tambahkan)
         stream: db.productDao.watchFavoriteProducts(),
         builder: (context, snapshot) {
           final products = snapshot.data ?? [];
@@ -30,7 +27,6 @@ class FavoritePage extends StatelessWidget {
             );
           }
 
-          // Tampilkan sebagai Grid, sama seperti halaman utama
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: products.length,
@@ -38,7 +34,7 @@ class FavoritePage extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.65,
             ),
             itemBuilder: (context, index) {
               final product = products[index];

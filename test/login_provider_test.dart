@@ -1,7 +1,5 @@
-// Lokasi: test/login_provider_test.dart
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:drift/native.dart'; // Untuk in-memory database
+import 'package:drift/native.dart'; 
 import 'package:app_kopidarihati/data/database/app_db.dart';
 import 'package:app_kopidarihati/providers/login_provider.dart';
 
@@ -27,7 +25,6 @@ void main() {
     });
 
     test('Bisa register user baru', () async {
-      // Register user baru
       final success = await loginProvider.register('testuser', '123456');
 
       expect(success, true);
@@ -38,19 +35,16 @@ void main() {
     test('Tidak bisa register dengan username yang sama', () async {
       await loginProvider.register('userA', '123');
 
-      // Coba register lagi dengan nama sama
       final success = await loginProvider.register('userA', '999');
 
-      expect(success, false); // Harusnya gagal
+      expect(success, false); 
       expect(loginProvider.loginError, isNotEmpty);
     });
 
     test('Login gagal jika password salah', () async {
       await loginProvider.register('userB', 'passwordBenar');
-      // Logout dulu
       loginProvider.logout();
 
-      // Coba login password salah
       final success = await loginProvider.login('userB', 'passwordSalah');
 
       expect(success, false);

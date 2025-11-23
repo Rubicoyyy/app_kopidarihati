@@ -16,7 +16,6 @@ class ConfirmationPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Anda bisa mengganti ini dengan animasi Lottie untuk efek lebih keren
               const Icon(
                 Icons.check_circle_outline_rounded,
                 size: 120,

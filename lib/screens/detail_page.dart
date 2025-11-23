@@ -1,13 +1,10 @@
-// Lokasi: lib/screens/detail_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../data/database/app_db.dart';
 import '../providers/cart_provider.dart';
-import '../widgets/universal_image.dart'; // Import UniversalImage
+import '../widgets/universal_image.dart'; 
 
 class DetailPage extends StatefulWidget {
   final Product product;
@@ -141,7 +138,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   ),
                   Text(
-                    widget.product.description, // <-- PANGGIL DARI DATABASE
+                    widget.product.description, 
                     style: GoogleFonts.montserrat(
                       fontSize: 14,
                       color: Colors.grey[600],

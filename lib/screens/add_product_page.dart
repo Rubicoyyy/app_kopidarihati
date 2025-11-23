@@ -28,9 +28,7 @@ class _AddProductPageState extends State<AddProductPage> {
     text: 'assets/images/latte.jpg',
   );
   final _ratingController = TextEditingController(text: '4.5');
-  // ===== CONTROLLER BARU =====
   final _descController = TextEditingController();
-  // ==========================
 
   String _selectedCategory = 'Coffee';
   final List<String> _categories = [
@@ -64,7 +62,7 @@ class _AddProductPageState extends State<AddProductPage> {
     _priceController.dispose();
     _imageController.dispose();
     _ratingController.dispose();
-    _descController.dispose(); // Dispose controller baru
+    _descController.dispose();
     super.dispose();
   }
 
@@ -96,7 +94,7 @@ class _AddProductPageState extends State<AddProductPage> {
       final title = _titleController.text;
       final price = double.parse(_priceController.text);
       final rating = double.parse(_ratingController.text);
-      final description = _descController.text; // Ambil deskripsi
+      final description = _descController.text;
 
       if (widget.productToEdit != null) {
         // UPDATE
@@ -108,7 +106,7 @@ class _AddProductPageState extends State<AddProductPage> {
           rating: rating,
           category: _selectedCategory,
           isFavorite: widget.productToEdit!.isFavorite,
-          description: description, // Simpan deskripsi
+          description: description,
         );
         db.productDao.updateProduct(updatedProduct);
       } else {
@@ -120,7 +118,7 @@ class _AddProductPageState extends State<AddProductPage> {
             image: imagePath,
             rating: rating,
             category: _selectedCategory,
-            description: drift.Value(description), // Simpan deskripsi
+            description: drift.Value(description),
           ),
         );
       }
@@ -193,21 +191,19 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
             const SizedBox(height: 16),
 
-            // ===== INPUT DESKRIPSI BARU =====
             TextFormField(
               controller: _descController,
               decoration: const InputDecoration(
                 labelText: 'Deskripsi Menu',
                 border: OutlineInputBorder(),
-                alignLabelWithHint: true, // Agar label di atas untuk multiline
+                alignLabelWithHint: true,
               ),
-              maxLines: 4, // Kotak lebih besar
+              maxLines: 4,
               keyboardType: TextInputType.multiline,
               validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
             ),
             const SizedBox(height: 16),
 
-            // ===============================
             TextFormField(
               controller: _priceController,
               decoration: const InputDecoration(

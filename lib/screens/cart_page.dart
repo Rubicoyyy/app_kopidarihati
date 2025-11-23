@@ -242,7 +242,7 @@ class _CartPageState extends State<CartPage> {
                           ).orderDao.createOrderAndItems(
                             customerName,
                             tableNumber,
-                            _selectedPaymentMethod, // <-- Kirim Data Pembayaran
+                            _selectedPaymentMethod, 
                             cart.items.values.toList(),
                           );
 

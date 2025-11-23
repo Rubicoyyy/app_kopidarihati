@@ -41,8 +41,7 @@ class DashboardPage extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Center(
-              ),
+              child: Center(),
             ),
           ),
           const SizedBox(height: 16),
@@ -108,7 +107,7 @@ class DashboardPage extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        width: 160,
+        width: 160, // Lebar kartu
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -125,7 +124,7 @@ class DashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 3,
+              flex: 1, 
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
@@ -137,32 +136,48 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
             ),
+
             Expanded(
-              flex: 2,
+              flex: 1, 
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0), 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       product.title,
-                      // ... (Style Teks)
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13, 
+                        color: const Color(0xFF37353E),
+                      ),
+                      maxLines: 2, 
+                      overflow: TextOverflow.ellipsis,
                     ),
+
+                    
                     Text(
                       currencyFormatter.format(product.price),
-                      // ... (Style Teks)
+                      style: GoogleFonts.montserrat(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
+
                     Row(
                       children: [
                         const Icon(Icons.star, color: Colors.amber, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           product.rating.toString(),
-                          // ... (Style Teks)
+                          style: GoogleFonts.montserrat(
+                            fontSize: 11,
+                            color: const Color(0xFF44444E),
+                          ),
                         ),
                         const Spacer(),
-
                         IconButton(
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -173,7 +188,7 @@ class DashboardPage extends StatelessWidget {
                             color: product.isFavorite
                                 ? Colors.red
                                 : Colors.grey.shade400,
-                            size: 16,
+                            size: 18,
                           ),
                           onPressed: () {
                             db.productDao.toggleFavoriteStatus(product);

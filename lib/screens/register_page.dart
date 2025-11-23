@@ -1,5 +1,3 @@
-// Lokasi: lib/screens/register_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +51,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         );
       }
-      // Jika sukses, router akan otomatis mengalihkan ke Home (karena status jadi loggedIn)
     }
   }
 
